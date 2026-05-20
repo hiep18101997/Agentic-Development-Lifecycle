@@ -7,6 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **`--lite` install flag** — `npx agentic-development-lifecycle --yes --lite` installs the 8-skill Developer Lite subset (`/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update`) plus 4 supporting agents, using a slim `bin/CLAUDE.lite.md`. Combines with `--lang ja|en|vi`. Claude Code only — rejects combinations with `--opencode/--cursor/--antigravity`.
+
+### Removed
+
+- **`packages/developer-lite/`** — the standalone sub-package and its broken `npx github:hiepdnh/Agentic-Development-Lifecycle/packages/developer-lite --yes` install path (npm doesn't support subdirectories of GitHub repos via npx, so the command silently no-op'd). Use `--lite` on the main installer instead.
+
+---
+
 ## [1.3.0] — 2026-05-15
 
 ### Added

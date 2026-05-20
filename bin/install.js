@@ -55,6 +55,23 @@ const src = path.resolve(__dirname, '..');
 const dst = process.cwd();
 const YES = process.argv.includes('--yes') || process.argv.includes('-y');
 const UPDATE = process.argv.includes('--update') || process.argv.includes('-u');
+const LITE = process.argv.includes('--lite');
+
+// Developer Lite: 8 skills only. Path is "<role>/<name>" (no extension, no lang suffix).
+const LITE_SKILLS = new Set([
+  'dev/analyze', 'dev/implement', 'dev/review', 'dev/pr', 'dev/debug',
+  'sec/review', 'arch/adr', 'docs/update',
+]);
+
+// Agents spawned by the lite skill set.
+const LITE_AGENTS = new Set([
+  'diff-reader.md', 'doc-updater.md', 'pr-resolver.md', 'review-reader.md',
+]);
+
+function liteSkillPath(relPath) {
+  // "dev/analyze.ja.md" -> "dev/analyze"; "arch/adr.md" -> "arch/adr"
+  return relPath.replace(/\.(en|ja)\.(md|txt)$/, '').replace(/\.(md|txt)$/, '');
+}
 
 function parsePlatform() {
   const flags = process.argv;
@@ -131,7 +148,7 @@ function langFilter(filename, siblingNames = new Set()) {
   return true;
 }
 
-function copyDir(srcDir, dstDir, filterEnabled = false) {
+function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRoot = '') {
   if (!fs.existsSync(srcDir)) return { copied: 0, skipped: 0, updated: 0, filtered: 0 };
   fs.mkdirSync(dstDir, { recursive: true });
   let copied = 0, skipped = 0, updated = 0, filtered = 0;
@@ -139,13 +156,18 @@ function copyDir(srcDir, dstDir, filterEnabled = false) {
   const siblingNames = new Set(entries.filter((e) => !e.isDirectory()).map((e) => e.name));
   for (const entry of entries) {
     const s = path.join(srcDir, entry.name);
+    const relPath = relRoot ? `${relRoot}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
-      const sub = copyDir(s, path.join(dstDir, entry.name), filterEnabled);
+      const sub = copyDir(s, path.join(dstDir, entry.name), filterEnabled, pathFilter, relPath);
       copied += sub.copied;
       skipped += sub.skipped;
       updated += sub.updated;
       filtered += sub.filtered;
     } else {
+      if (pathFilter && !pathFilter(relPath)) {
+        filtered++;
+        continue;
+      }
       if (filterEnabled && !langFilter(entry.name, siblingNames)) {
         filtered++;
         continue;
@@ -182,8 +204,14 @@ async function main() {
   console.log(pc.cyan(BANNER));
   console.log();
 
-  const title = UPDATE ? ` Agentic Development Lifecycle — Update (${PLATFORM}) ` : ` Agentic Development Lifecycle — Setup (${PLATFORM}) `;
+  const flavour = LITE ? `${PLATFORM} · Lite` : PLATFORM;
+  const title = UPDATE ? ` Agentic Development Lifecycle — Update (${flavour}) ` : ` Agentic Development Lifecycle — Setup (${flavour}) `;
   intro(pc.bgCyan(pc.black(title)));
+
+  if (LITE && PLATFORM_KEY !== 'claude') {
+    cancel('--lite is only supported for Claude Code. Remove --opencode/--cursor/--antigravity to use --lite.');
+    process.exit(1);
+  }
 
   if (src === dst) {
     cancel('Source and target are the same directory.');
@@ -193,6 +221,7 @@ async function main() {
   log.info(`Target: ${pc.green(dst)}`);
   log.info(`Platform: ${pc.cyan(PLATFORM)} (use ${pc.dim('--opencode | --cursor | --antigravity')} to switch)`);
   log.info(`Language: ${pc.cyan(LANG)} (use ${pc.dim('--lang ja|en|vi|all')} to filter)`);
+  if (LITE) log.info(`Mode: ${pc.magenta('Developer Lite')} ${pc.dim('— 8 skills only')}`);
 
   if (!YES) {
     const action = UPDATE ? 'Update' : 'Install';
@@ -235,14 +264,16 @@ async function main() {
     s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
   } else {
     s.start('Copying skill commands...');
-    const cmdResult = copyDir(path.join(src, '.claude', 'commands'), cmdDstPath, true);
+    const skillFilter = LITE ? (relPath) => LITE_SKILLS.has(liteSkillPath(relPath)) : null;
+    const cmdResult = copyDir(path.join(src, '.claude', 'commands'), cmdDstPath, true, skillFilter);
     s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
   }
 
   // 2. agents (Claude Code only — other platforms do not use agents/ directory) — lang-aware
   if (PLATFORM_KEY === 'claude') {
     s.start('Copying agent definitions...');
-    const agentsResult = copyDir(path.join(src, 'agents'), path.join(dst, 'agents'), true);
+    const agentFilter = LITE ? (relPath) => LITE_AGENTS.has(relPath) : null;
+    const agentsResult = copyDir(path.join(src, 'agents'), path.join(dst, 'agents'), true, agentFilter);
     s.stop(resultMsg('agents/', agentsResult));
   }
 
@@ -251,44 +282,47 @@ async function main() {
   const templatesResult = copyDir(path.join(src, 'templates'), path.join(dst, 'templates'), true);
   s.stop(resultMsg('templates/', templatesResult));
 
-  // 4. docs/workflows — lang-aware
-  s.start('Copying workflow docs...');
   const docsDst = path.join(dst, 'docs');
   fs.mkdirSync(docsDst, { recursive: true });
-  const workflowsResult = copyDir(path.join(src, 'docs', 'workflows'), path.join(docsDst, 'workflows'), true);
-  s.stop(resultMsg('docs/workflows/', workflowsResult));
 
-  // 4b. docs root framework files (always overwrite on --update) — lang-aware
-  s.start('Copying framework doc files...');
-  const docRootFiles = ['risk-classifier.md', 'risk-classifier.ja.md', 'validation-matrix.md'];
-  const docRootSiblings = new Set(docRootFiles);
-  let docRootCopied = 0, docRootUpdated = 0, docRootFiltered = 0;
-  for (const file of docRootFiles) {
-    const srcFile = path.join(src, 'docs', file);
-    if (!fs.existsSync(srcFile)) continue;
-    if (!langFilter(file, docRootSiblings)) { docRootFiltered++; continue; }
-    const dstFileName = getLangDestName(file);
-    const dstFile = path.join(docsDst, dstFileName);
-    if (fs.existsSync(dstFile)) {
-      if (UPDATE) { fs.copyFileSync(srcFile, dstFile); docRootUpdated++; }
-    } else {
-      fs.copyFileSync(srcFile, dstFile);
-      docRootCopied++;
+  if (!LITE) {
+    // 4. docs/workflows — lang-aware
+    s.start('Copying workflow docs...');
+    const workflowsResult = copyDir(path.join(src, 'docs', 'workflows'), path.join(docsDst, 'workflows'), true);
+    s.stop(resultMsg('docs/workflows/', workflowsResult));
+
+    // 4b. docs root framework files (always overwrite on --update) — lang-aware
+    s.start('Copying framework doc files...');
+    const docRootFiles = ['risk-classifier.md', 'risk-classifier.ja.md', 'validation-matrix.md'];
+    const docRootSiblings = new Set(docRootFiles);
+    let docRootCopied = 0, docRootUpdated = 0, docRootFiltered = 0;
+    for (const file of docRootFiles) {
+      const srcFile = path.join(src, 'docs', file);
+      if (!fs.existsSync(srcFile)) continue;
+      if (!langFilter(file, docRootSiblings)) { docRootFiltered++; continue; }
+      const dstFileName = getLangDestName(file);
+      const dstFile = path.join(docsDst, dstFileName);
+      if (fs.existsSync(dstFile)) {
+        if (UPDATE) { fs.copyFileSync(srcFile, dstFile); docRootUpdated++; }
+      } else {
+        fs.copyFileSync(srcFile, dstFile);
+        docRootCopied++;
+      }
     }
-  }
-  s.stop(resultMsg('docs/ framework files', { copied: docRootCopied, skipped: docRootFiles.length - docRootCopied - docRootUpdated - docRootFiltered, updated: docRootUpdated, filtered: docRootFiltered }));
+    s.stop(resultMsg('docs/ framework files', { copied: docRootCopied, skipped: docRootFiles.length - docRootCopied - docRootUpdated - docRootFiltered, updated: docRootUpdated, filtered: docRootFiltered }));
 
-  // 4d. docs/analysis (framework content — skip-if-exists, overwrite on --update)
-  s.start('Copying analysis docs...');
-  const analysisResult = copyDir(path.join(src, 'docs', 'analysis'), path.join(docsDst, 'analysis'));
-  s.stop(resultMsg('docs/analysis/', analysisResult));
+    // 4d. docs/analysis (framework content — skip-if-exists, overwrite on --update)
+    s.start('Copying analysis docs...');
+    const analysisResult = copyDir(path.join(src, 'docs', 'analysis'), path.join(docsDst, 'analysis'));
+    s.stop(resultMsg('docs/analysis/', analysisResult));
 
-  // 4c. improvement-backlog.md — only if missing (user-mutable, never overwrite)
-  const backlogSrc = path.join(src, 'docs', 'improvement-backlog.md');
-  const backlogDst = path.join(docsDst, 'improvement-backlog.md');
-  if (fs.existsSync(backlogSrc) && !fs.existsSync(backlogDst)) {
-    fs.copyFileSync(backlogSrc, backlogDst);
-    log.info(`${pc.green('◆')} docs/improvement-backlog.md ${pc.dim('— created')}`);
+    // 4c. improvement-backlog.md — only if missing (user-mutable, never overwrite)
+    const backlogSrc = path.join(src, 'docs', 'improvement-backlog.md');
+    const backlogDst = path.join(docsDst, 'improvement-backlog.md');
+    if (fs.existsSync(backlogSrc) && !fs.existsSync(backlogDst)) {
+      fs.copyFileSync(backlogSrc, backlogDst);
+      log.info(`${pc.green('◆')} docs/improvement-backlog.md ${pc.dim('— created')}`);
+    }
   }
 
   // 5. empty doc dirs
@@ -323,7 +357,10 @@ async function main() {
       const actualSrc = fs.existsSync(ocConfigSrc) ? ocConfigSrc : ccConfigSrc;
       fs.copyFileSync(actualSrc, configDst);
     } else {
-      fs.copyFileSync(path.join(src, 'CLAUDE.md'), configDst);
+      const claudeSrc = LITE
+        ? path.join(__dirname, 'CLAUDE.lite.md')
+        : path.join(src, 'CLAUDE.md');
+      fs.copyFileSync(claudeSrc, configDst);
     }
     s.stop(`${pc.green('◆')} ${CONFIG_FILE}`);
   }
@@ -379,6 +416,23 @@ async function main() {
         ``,
         `4. Caveat: Antigravity skill convention is still stabilising — if Agent Manager`,
         `   misinterprets ${pc.dim('task()/question()')} syntax, file an issue.`,
+      ].join('\n'),
+      'Next steps'
+    );
+  } else if (LITE) {
+    note(
+      [
+        `1. Open project in Claude Code:`,
+        `   ${pc.cyan('claude .')}`,
+        ``,
+        `2. The 8 lite skills:`,
+        `   ${pc.cyan('/dev:analyze  /dev:implement  /dev:review  /dev:pr')}`,
+        `   ${pc.cyan('/dev:debug    /sec:review     /arch:adr     /docs:update')}`,
+        ``,
+        `3. Workflow: ${pc.dim('/dev:analyze → /dev:implement → /dev:review → /dev:pr → merge')}`,
+        ``,
+        `4. Want PM/BA/QA/Ops too? Upgrade later with:`,
+        `   ${pc.cyan('npx agentic-development-lifecycle --update --yes')}`,
       ].join('\n'),
       'Next steps'
     );

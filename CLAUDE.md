@@ -81,6 +81,15 @@ npx agentic-development-lifecycle --yes --lang all
 
 Mutually-exclusive platform flags: pass only one of `--opencode`, `--cursor`, `--antigravity`. Default (no flag) is Claude Code.
 
+Developer Lite minimal install (Claude Code only — 8 dev/sec/arch/docs skills, no PM/BA/QA/Ops):
+
+```bash
+npx agentic-development-lifecycle --yes --lite
+npx agentic-development-lifecycle --yes --lite --lang en
+```
+
+`--lite` cannot combine with `--opencode/--cursor/--antigravity`. Skips `docs/workflows/`, `risk-classifier.md`, `analysis/`, `improvement-backlog.md`, and uses `bin/CLAUDE.lite.md` as the CLAUDE.md source.
+
 ### Test installation
 
 ```powershell
@@ -273,11 +282,10 @@ When adding new commands that need shell access, update `settings.json`.
 ```
 .claude/commands/         # Canonical source — Skills (VN) + .en.md + .ja.md cho Claude Code
 .opencode/skills/         # Hand port cho OpenCode (task() / question() syntax)
-packages/
-  developer-lite/         # Minimal 8-skill sub-package cho individual devs
 agents/                   # Subagent definitions (spawned bởi orchestrator commands)
 bin/
-  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity
+  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --lite
+  CLAUDE.lite.md          # Dropped-in as CLAUDE.md when --lite is set
   transformers/
     cursor.js             # Transform .claude/commands/*.md → .cursor/rules/*.mdc at install
     antigravity.js        # Alias .opencode/skills/ → .antigravity/skills/ at install

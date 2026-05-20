@@ -23,7 +23,7 @@ No build step — skill files are plain Markdown.
 .opencode/skills/       # OpenCode skills (VN + .en.md EN variants)
 agents/                 # Subagent definitions spawned by orchestrator skills
 templates/              # Skeleton templates referenced by skills
-packages/developer-lite # Standalone 8-skill sub-package
+bin/CLAUDE.lite.md      # Drop-in CLAUDE.md used by `--lite` minimal install
 tests/skill-triggering/ # Trigger test prompts + test scripts
 bin/install.js          # npm installer
 ```

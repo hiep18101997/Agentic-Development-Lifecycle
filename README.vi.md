@@ -67,11 +67,10 @@ npx agentic-development-lifecycle --yes --opencode
 Chỉ cần developer workflow mà không cần overhead PM/BA/QA/Ops?
 
 ```bash
-# Claude Code
-node packages/developer-lite/bin/install.js --yes
+npx agentic-development-lifecycle --yes --lite
 ```
 
-Bao gồm: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update`
+Cài 8 skill: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update` (chỉ Claude Code). Kết hợp với `--lang ja` hoặc `--lang en` để chọn ngôn ngữ. Sau này muốn nâng cấp lên full framework: `npx agentic-development-lifecycle --update --yes`.
 
 ---
 

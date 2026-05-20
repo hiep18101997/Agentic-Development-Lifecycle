@@ -96,11 +96,10 @@ When using `--lang ja` or `--lang en`, skills are installed **without the langua
 Just want the developer workflow without PM/BA/QA/Ops overhead?
 
 ```bash
-# Claude Code
-node packages/developer-lite/bin/install.js --yes
+npx agentic-development-lifecycle --yes --lite
 ```
 
-Includes: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update`
+Installs only 8 skills: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update` (Claude Code only). Combine with `--lang ja` or `--lang en` to pick a language. Upgrade to the full framework later with `npx agentic-development-lifecycle --update --yes`.
 
 ---
 

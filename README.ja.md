@@ -79,11 +79,10 @@ npx agentic-development-lifecycle --yes --opencode --lang ja
 PM/BA/QA/Ops のスキル不要で、開発者ワークフローだけ欲しい場合:
 
 ```bash
-# Claude Code
-node packages/developer-lite/bin/install.js --yes
+npx agentic-development-lifecycle --yes --lite
 ```
 
-含まれるスキル: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update`
+8 つのスキルのみインストール: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update`（Claude Code 専用）。 `--lang ja` または `--lang en` と組み合わせて言語を選択可能。後でフルフレームワークへアップグレード: `npx agentic-development-lifecycle --update --yes`。
 
 ---
 

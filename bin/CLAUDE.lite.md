@@ -1,4 +1,4 @@
-# CLAUDE.md — Developer Lite Skill Pack
+# CLAUDE.md — Developer Lite
 
 Minimal skill set for individual developers and small teams. Covers the full dev cycle without PM/BA/QA/Ops overhead.
 
@@ -25,8 +25,8 @@ Minimal skill set for individual developers and small teams. Covers the full dev
 Task → /dev:analyze → choose option → /dev:implement → /dev:review → /dev:pr → merge
 ```
 
-For bugs: `/dev:debug` → fix → `/dev:review` → `/dev:pr`  
-For design decisions surfaced during review: `/arch:adr`  
+For bugs: `/dev:debug` → fix → `/dev:review` → `/dev:pr`
+For design decisions surfaced during review: `/arch:adr`
 After merge: `/docs:update`
 
 ---
@@ -74,3 +74,15 @@ Stop and ask senior/team before proceeding:
 - Breaking changes in public API
 - Database migrations affecting existing data
 - New storage of sensitive/PII data
+
+---
+
+## Upgrade to full framework
+
+Want PM/BA/QA/Ops skills, JP-VN bridge, templates, workflows?
+
+```bash
+npx agentic-development-lifecycle --update --yes
+```
+
+Full framework adds 24+ skills covering the whole SDLC for cross-functional teams.
