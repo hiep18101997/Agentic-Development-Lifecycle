@@ -1,0 +1,1 @@
+Mình cần tạo unit test plan cho module xử lý discount, cover từng hàm tính giá. Hỗ trợ ghi kết quả khi mình chạy tay từng case.

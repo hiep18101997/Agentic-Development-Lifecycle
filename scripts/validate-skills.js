@@ -7,6 +7,14 @@ const ROOTS = [
   { dir: '.opencode/skills', label: 'OpenCode' },
 ];
 
+// Per-variant trigger phrase patterns. A description must contain at least one
+// of the language-appropriate phrases so the skill auto-triggers correctly.
+const TRIGGER_PATTERNS = {
+  vi: [/Trigger khi:/i, /hoặc gõ \//i],
+  en: [/Trigger(s)? when:/i, /or type[s]? \//i],
+  ja: [/トリガー[:：]/, /または \/[^ ]+ と入力時/],
+};
+
 const errors = [];
 
 function walk(dir) {
@@ -26,10 +34,30 @@ function parseFrontmatter(content) {
   if (!m) return null;
   const fields = {};
   const yaml = m[1];
-  const nameMatch = yaml.match(/^name:\s*(.+?)$/m);
-  if (nameMatch) fields.name = nameMatch[1].trim();
-  const descMatch = yaml.match(/^description:\s*([\s\S]+?)(?=\n[a-z]+:|$)/m);
-  if (descMatch) fields.description = descMatch[1].trim();
+  const lines = yaml.split('\n');
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const kv = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+    if (!kv) { i++; continue; }
+    const key = kv[1];
+    let value = kv[2];
+    // If value starts with a YAML block scalar indicator (> or |) or is empty,
+    // collect indented continuation lines until the next top-level key.
+    if (value === '' || value === '>' || value === '|' || value === '>-' || value === '|-') {
+      const collected = [];
+      i++;
+      while (i < lines.length && /^(\s+|$)/.test(lines[i])) {
+        collected.push(lines[i].trim());
+        i++;
+      }
+      value = collected.filter(Boolean).join(' ');
+    } else {
+      i++;
+    }
+    if (key === 'name' && !fields.name) fields.name = value.trim();
+    if (key === 'description' && !fields.description) fields.description = value.trim();
+  }
   return fields;
 }
 
@@ -44,6 +72,12 @@ function expectedName(rootDir, filePath) {
 
 function baseStem(filePath) {
   return filePath.replace(/\.(en|ja)\.md$/, '.md');
+}
+
+function variantOf(filePath) {
+  if (filePath.endsWith('.en.md')) return 'en';
+  if (filePath.endsWith('.ja.md')) return 'ja';
+  return 'vi';
 }
 
 for (const { dir, label } of ROOTS) {
@@ -77,6 +111,17 @@ for (const { dir, label } of ROOTS) {
     const expected = expectedName(dir, file);
     if (fm.name && fm.name !== expected) {
       errors.push(`[${label}] name mismatch: ${file} declares '${fm.name}' but path implies '${expected}'`);
+    }
+
+    // Trigger phrase check — skip skills whose description was intentionally
+    // collapsed to '---' (a few EN/JA stub files use this as a placeholder).
+    if (fm.description && fm.description !== '---') {
+      const variant = variantOf(file);
+      const patterns = TRIGGER_PATTERNS[variant] || [];
+      const hasTrigger = patterns.some((re) => re.test(fm.description));
+      if (!hasTrigger) {
+        errors.push(`[${label}] description missing ${variant.toUpperCase()} trigger phrase: ${file}`);
+      }
     }
   }
 

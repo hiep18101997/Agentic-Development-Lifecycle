@@ -1,0 +1,1 @@
+I need a unit test plan for the discount calculation module, covering each pricing function. Support recording results as I execute each case manually.

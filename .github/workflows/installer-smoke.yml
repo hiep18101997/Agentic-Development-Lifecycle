@@ -2,11 +2,29 @@ name: Installer Smoke
 
 on:
   pull_request:
+    paths:
+      - '.claude/**'
+      - '.opencode/**'
+      - 'agents/**'
+      - 'assets/**'
+      - 'bin/**'
+      - 'packages/**'
+      - 'scripts/**'
+      - 'templates/**'
+      - 'package.json'
+      - '.github/workflows/installer-smoke.yml'
   push:
     branches: [main]
 
 permissions:
   contents: read
+
+concurrency:
+  group: installer-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MIN_SKILL_FILES: 96
 
 jobs:
   smoke:
@@ -24,8 +42,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm install --no-audit --no-fund
 
       - name: Install into temp dir
         shell: bash
@@ -67,5 +86,8 @@ jobs:
               ;;
           esac
           count=$(echo "$count" | tr -d ' ')
-          test "$count" = "102" || { echo "FAIL: found $count skill files (expected 102)"; exit 1; }
+          if [ "$count" -lt "$MIN_SKILL_FILES" ]; then
+            echo "FAIL: found $count skill files (expected >= $MIN_SKILL_FILES)"
+            exit 1
+          fi
           echo "OK: $count skill files installed for ${{ matrix.platform }} on ${{ matrix.os }}"

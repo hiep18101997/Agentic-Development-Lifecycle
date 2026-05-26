@@ -2,11 +2,20 @@ name: Validate Skills
 
 on:
   pull_request:
+    paths:
+      - '.claude/**'
+      - '.opencode/**'
+      - 'scripts/validate-skills.js'
+      - '.github/workflows/validate-skills.yml'
   push:
     branches: [main]
 
 permissions:
   contents: read
+
+concurrency:
+  group: validate-skills-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -17,5 +26,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - run: node scripts/validate-skills.js

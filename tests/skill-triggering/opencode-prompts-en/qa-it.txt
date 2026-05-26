@@ -1,0 +1,1 @@
+Unit tests for the checkout flow are all passing. I need an integration / E2E test plan for the order → payment → email confirmation flow that I will execute manually and record results.

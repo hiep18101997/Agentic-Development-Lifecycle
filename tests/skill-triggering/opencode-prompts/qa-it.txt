@@ -1,0 +1,1 @@
+UT cho luồng checkout đã pass. Cần lên integration / E2E test plan cho luồng order → payment → email confirmation, mình sẽ thực thi tay và ghi kết quả.

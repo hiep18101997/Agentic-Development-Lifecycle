@@ -1,0 +1,98 @@
+name: Skill Triggering Smoke
+
+on:
+  pull_request:
+    paths:
+      - '.opencode/**'
+      - 'tests/skill-triggering/**'
+      - '.github/workflows/skill-triggering.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  opencode-mapping:
+    name: opencode prompt → skill mapping
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify every OpenCode skill has a matching prompt fixture
+        shell: bash
+        run: |
+          set -uo pipefail
+          fail=0
+
+          # Skill IDs per language. Format: role:command
+          # The `install` skill has no prompt fixture by convention.
+          skills_vi=$(find .opencode/skills -type f -name '*.md' \
+            ! -name '*.en.md' ! -name '*.ja.md' \
+            | grep -v '/install/' \
+            | sed -E 's|^\.opencode/skills/([^/]+)/([^/]+)\.md$|\1:\2|' \
+            | sort -u)
+
+          skills_en=$(find .opencode/skills -type f -name '*.en.md' \
+            | grep -v '/install/' \
+            | sed -E 's|^\.opencode/skills/([^/]+)/([^/]+)\.en\.md$|\1:\2|' \
+            | sort -u)
+
+          skills_ja=$(find .opencode/skills -type f -name '*.ja.md' \
+            | grep -v '/install/' \
+            | sed -E 's|^\.opencode/skills/([^/]+)/([^/]+)\.ja\.md$|\1:\2|' \
+            | sort -u)
+
+          # Prompt IDs per language. Convert <role>-<rest>.txt → role:rest
+          # JA files use <role>-<rest>.ja.txt — strip the .ja first.
+          prompts_from_dir() {
+            local dir="$1" strip_ja="$2"
+            [ -d "$dir" ] || return 0
+            local cmd=(find "$dir" -maxdepth 1 -name '*.txt' -printf '%f\n')
+            if [ "$strip_ja" = "yes" ]; then
+              "${cmd[@]}" | sed -E 's|\.ja\.txt$||; s|^([^-]+)-(.*)$|\1:\2|' | sort -u
+            else
+              "${cmd[@]}" | sed -E 's|\.txt$||; s|^([^-]+)-(.*)$|\1:\2|' | sort -u
+            fi
+          }
+
+          prompts_vi=$(prompts_from_dir tests/skill-triggering/opencode-prompts    no)
+          prompts_en=$(prompts_from_dir tests/skill-triggering/opencode-prompts-en no)
+          prompts_ja=$(prompts_from_dir tests/skill-triggering/opencode-prompts-ja yes)
+
+          check() {
+            local lang="$1" skills="$2" prompts="$3"
+            local s_count p_count
+            s_count=$(echo "$skills"  | grep -c . || true)
+            p_count=$(echo "$prompts" | grep -c . || true)
+            echo "[$lang] skills=$s_count prompts=$p_count"
+            local missing
+            missing=$(comm -23 <(echo "$skills") <(echo "$prompts"))
+            if [ -n "$missing" ]; then
+              echo "FAIL [$lang] skills without prompt fixture:"
+              echo "$missing" | sed 's/^/  - /'
+              return 1
+            fi
+            local extra
+            extra=$(comm -13 <(echo "$skills") <(echo "$prompts"))
+            if [ -n "$extra" ]; then
+              echo "WARN [$lang] prompt fixtures without matching skill (non-fatal):"
+              echo "$extra" | sed 's/^/  - /'
+            fi
+          }
+
+          check vi "$skills_vi" "$prompts_vi" || fail=1
+          check en "$skills_en" "$prompts_en" || fail=1
+          check ja "$skills_ja" "$prompts_ja" || fail=1
+
+          if [ "$fail" -ne 0 ]; then
+            echo ""
+            echo "Skill triggering smoke FAILED — add the missing prompt fixtures."
+            exit 1
+          fi
+          echo ""
+          echo "OK: every OpenCode skill has a prompt fixture in every language."
