@@ -19,7 +19,7 @@ No build step — skill files are plain Markdown.
 ## Repository layout
 
 ```
-.claude/commands/       # Claude Code skills (VN + .en.md EN variants)
+.claude/skills/         # Claude Code Agent Skills (one folder per skill)
 .opencode/skills/       # OpenCode skills (VN + .en.md EN variants)
 agents/                 # Subagent definitions spawned by orchestrator skills
 templates/              # Skeleton templates referenced by skills
@@ -36,8 +36,9 @@ Every skill ships in **4 files**:
 
 | File | Platform | Language |
 |------|----------|----------|
-| `.claude/commands/<role>/<name>.md` | Claude Code | Vietnamese |
-| `.claude/commands/<role>/<name>.en.md` | Claude Code | English |
+| `.claude/skills/<role-command>/SKILL.md` | Claude Code | Vietnamese |
+| `.claude/skills/<role-command>/SKILL.en.md` | Claude Code | English |
+| `.claude/skills/<role-command>/SKILL.ja.md` | Claude Code | Japanese |
 | `.opencode/skills/<role>/<name>.md` | OpenCode | Vietnamese |
 | `.opencode/skills/<role>/<name>.en.md` | OpenCode | English |
 
@@ -86,7 +87,7 @@ tests/skill-triggering/opencode-prompts/<role>-<name>.txt     # VN OpenCode
 tests/skill-triggering/opencode-prompts-en/<role>-<name>.txt  # EN OpenCode
 ```
 
-Filename convention: first hyphen becomes colon → `ba-spec.txt` tests `ba:spec`.
+Filename convention (Claude Code): the basename maps directly to the skill folder name → `ba-spec.txt` tests `/ba-spec`. (OpenCode prompts still map the first hyphen to a colon → `ba:spec`.)
 
 Run tests:
 

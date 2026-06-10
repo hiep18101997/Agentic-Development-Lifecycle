@@ -6,7 +6,7 @@ function transformContent(source) {
 
   body = transformFrontmatter(body);
 
-  body = body.replace(/^# Skill: \/([\w-]+):([\w-]+)/m, '# /$1:$2');
+  body = body.replace(/^# Skill: \/([\w-]+)/m, '# /$1');
 
   body = body.replace(/AskUserQuestion\(/g, 'Ask the user (');
 
@@ -51,51 +51,40 @@ function transformFrontmatter(source) {
   return `---\n${out.join('\n').replace(/\n+$/, '')}\n---\n${rest}`;
 }
 
-function copyAndTransform(srcDir, dstDir, opts = {}) {
-  const { langFilter, getLangDestName, update } = opts;
-  if (!fs.existsSync(srcDir)) return { copied: 0, skipped: 0, updated: 0, filtered: 0 };
+// Transform Claude Code Agent Skills (`.claude/skills/<skill>/SKILL[.lang].md`) into flat
+// Cursor rules (`.cursor/rules/<skill>.mdc`). Per --lang:
+//   vi/en/ja → one `<skill>.mdc`   |   all → `<skill>.mdc`, `<skill>-en.mdc`, `<skill>-ja.mdc`
+function copyAndTransform(srcSkillsDir, dstDir, opts = {}) {
+  const { lang = 'all', update } = opts;
+  if (!fs.existsSync(srcSkillsDir)) return { copied: 0, skipped: 0, updated: 0, filtered: 0 };
   fs.mkdirSync(dstDir, { recursive: true });
   let copied = 0, skipped = 0, updated = 0, filtered = 0;
 
-  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
-  const siblingNames = new Set(entries.filter((e) => !e.isDirectory()).map((e) => e.name));
-
-  for (const entry of entries) {
-    const s = path.join(srcDir, entry.name);
-    if (entry.isDirectory()) {
-      const sub = copyAndTransform(s, path.join(dstDir, entry.name), opts);
-      copied += sub.copied;
-      skipped += sub.skipped;
-      updated += sub.updated;
-      filtered += sub.filtered;
-      continue;
+  for (const skill of fs.readdirSync(srcSkillsDir, { withFileTypes: true })) {
+    if (!skill.isDirectory()) continue;
+    const skillDir = path.join(srcSkillsDir, skill.name);
+    const has = (n) => fs.existsSync(path.join(skillDir, n));
+    const targets = [];
+    if (lang === 'vi') {
+      targets.push({ src: 'SKILL.md', out: skill.name });
+    } else if (lang === 'en') {
+      targets.push({ src: has('SKILL.en.md') ? 'SKILL.en.md' : 'SKILL.md', out: skill.name });
+    } else if (lang === 'ja') {
+      targets.push({ src: has('SKILL.ja.md') ? 'SKILL.ja.md' : 'SKILL.md', out: skill.name });
+    } else { // all
+      targets.push({ src: 'SKILL.md', out: skill.name });
+      if (has('SKILL.en.md')) targets.push({ src: 'SKILL.en.md', out: `${skill.name}-en` });
+      if (has('SKILL.ja.md')) targets.push({ src: 'SKILL.ja.md', out: `${skill.name}-ja` });
     }
-
-    if (langFilter && !langFilter(entry.name, siblingNames)) {
-      filtered++;
-      continue;
+    for (const t of targets) {
+      const s = path.join(skillDir, t.src);
+      if (!fs.existsSync(s)) continue;
+      const d = path.join(dstDir, `${t.out}.mdc`);
+      const exists = fs.existsSync(d);
+      if (exists && !update) { skipped++; continue; }
+      fs.writeFileSync(d, transformContent(fs.readFileSync(s, 'utf8')));
+      if (exists) updated++; else copied++;
     }
-
-    // Strip lang suffix first, then apply .md → .mdc for Cursor
-    const baseName = getLangDestName ? getLangDestName(entry.name) : entry.name;
-
-    if (!baseName.endsWith('.md')) {
-      const d = path.join(dstDir, baseName);
-      if (fs.existsSync(d) && !update) { skipped++; continue; }
-      fs.copyFileSync(s, d);
-      if (fs.existsSync(d) && update) updated++; else copied++;
-      continue;
-    }
-
-    const dstName = baseName.replace(/\.md$/, '.mdc');
-    const d = path.join(dstDir, dstName);
-    const exists = fs.existsSync(d);
-    if (exists && !update) { skipped++; continue; }
-
-    const content = fs.readFileSync(s, 'utf8');
-    const transformed = transformContent(content);
-    fs.writeFileSync(d, transformed);
-    if (exists) updated++; else copied++;
   }
 
   return { copied, skipped, updated, filtered };

@@ -15,10 +15,9 @@ if [[ ! -f "$PROMPT_FILE" ]]; then
   exit 1
 fi
 
-# Derive expected skill name from filename: ba-spec.txt -> ba:spec
+# Skill folder name == prompt basename (ba-spec.txt -> /ba-spec, ba-user-story.txt -> /ba-user-story)
 BASENAME="$(basename "$PROMPT_FILE" .txt)"
-# Replace first hyphen with colon (ba-spec -> ba:spec, sm-standup -> sm:standup)
-EXPECTED_SKILL="${BASENAME/-/:}"
+EXPECTED_SKILL="$BASENAME"
 
 # Output directory — sanitize skill name for filesystem (: invalid on Windows)
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"

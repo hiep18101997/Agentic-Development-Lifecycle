@@ -12,20 +12,19 @@ Framework hỗ trợ toàn bộ SDLC cho mọi role. Dùng được cho bất k�
 
 This repo IS the framework source. Two hand-maintained skill trees serve as canonical sources:
 
-- `.claude/commands/` — Claude Code (32 VN + 32 EN + 32 JP = 96 files)
-- `.opencode/skills/` — OpenCode hand port (96 files) with `task()` / `question()` syntax
+- `.claude/skills/` — Claude Code **Agent Skills** (34 skills × 3 langs = 102 `SKILL*.md` files). Each skill is a flat folder `.claude/skills/<role-command>/` holding `SKILL.md` (VN) + `SKILL.en.md` + `SKILL.ja.md`. Skills **auto-trigger** from their `description` frontmatter and can also be invoked explicitly as `/role-command` (e.g. `/ba-spec`).
+- `.opencode/skills/` — OpenCode hand port (102 files) with `task()` / `question()` syntax, nested `<role>/<name>.md`, invoked as `role:command`.
 
 Cursor and Antigravity targets are **generated at install time** from these sources — no separate hand-maintained tree:
 
-- **Cursor** → `bin/transformers/cursor.js` transforms `.claude/commands/*.md` → `.cursor/rules/*.mdc` (rewrites frontmatter to `description` + `globs: []` + `alwaysApply: false`; strips the `# Skill:` prefix; relabels `Agent(...)` blocks as `Sub-task Agent(...)`). Cursor Agent is single-agent, so multi-agent skills execute inline.
+- **Cursor** → `bin/transformers/cursor.js` transforms `.claude/skills/*/SKILL.md` → `.cursor/rules/*.mdc` (one flat `.mdc` per skill; rewrites frontmatter to `description` + `globs: []` + `alwaysApply: false`; strips the `# Skill:` prefix; relabels `Agent(...)` blocks as `Sub-task Agent(...)`). Cursor Agent is single-agent, so multi-agent skills execute inline.
 - **Antigravity** → `bin/transformers/antigravity.js` copies `.opencode/skills/*` → `.antigravity/skills/*` (alias — OpenCode `task()`/`question()` syntax is reused since Antigravity's skill convention is not yet stable).
 
 **Language variants** (per skill / agent / template / workflow doc):
-- `name.md` — Vietnamese (canonical source — VN baseline)
-- `name.en.md` — English
-- `name.ja.md` — 日本語 (Japanese)
+- Claude skills: `SKILL.md` (VN, canonical), `SKILL.en.md`, `SKILL.ja.md` — all in the same skill folder.
+- Other artifacts (agents / templates / workflow docs): `name.md` (VN), `name.en.md`, `name.ja.md`.
 
-When adding a new skill, create all 3 variants. Translation flows from VN → EN → JA; keep frontmatter `name:` identical across variants. JP variants reference `assets/ask-first-gates.ja.md`, `docs/risk-classifier.ja.md`, and use JP business terminology from `templates/jp-vn-en-glossary.md`.
+When adding a new skill, create the folder `.claude/skills/<role-command>/` with all 3 `SKILL*.md` variants. Translation flows from VN → EN → JA; keep frontmatter `name:` identical across variants (must equal the folder name). JP variants reference `assets/ask-first-gates.ja.md`, `docs/risk-classifier.ja.md`, and use JP business terminology from `templates/jp-vn-en-glossary.md`.
 
 ### Run installer locally
 
@@ -68,11 +67,11 @@ npx agentic-development-lifecycle --yes --antigravity
 # Update existing install
 npx agentic-development-lifecycle --update --yes
 
-# Install single-language variant (skills installed WITHOUT lang suffix)
-# --lang ja: spec.ja.md → installed as spec.md  (no .ja suffix)
-# --lang en: spec.en.md → installed as spec.md  (no .en suffix)
-# --lang vi: VN base files only (no .en.md/.ja.md)
-# --lang all: all variants with original names (default)
+# Install single-language variant (one skill folder per command)
+# --lang ja: ba-spec/SKILL.ja.md → installed as ba-spec/SKILL.md
+# --lang en: ba-spec/SKILL.en.md → installed as ba-spec/SKILL.md
+# --lang vi: VN SKILL.md only
+# --lang all: fan out to ba-spec/, ba-spec-en/, ba-spec-ja/ (each SKILL.md) — default
 npx agentic-development-lifecycle --yes --lang ja
 npx agentic-development-lifecycle --yes --lang en
 npx agentic-development-lifecycle --yes --lang vi
@@ -126,7 +125,7 @@ pwsh tests/skill-triggering/opencode-run-all.ps1 -Filter "dev-*"
 ```
 Validates prompt→skill file mapping (smoke test). Full trigger validation requires a live OpenCode session.
 
-**Prompt filename → expected skill**: replace the **first** hyphen with a colon (`ba-spec.txt` → `ba:spec`, `ba-spec.en.txt` → `ba:spec.en`). New prompt files must follow this pattern.
+**Prompt filename → expected skill**: the basename maps directly to the skill folder name (`ba-spec.txt` → `ba-spec`, `ba-user-story.en.txt` → `ba-user-story`). New prompt files must follow this pattern.
 
 ### Validate skill files
 
@@ -135,66 +134,68 @@ npm run validate
 # or: node scripts/validate-skills.js
 ```
 
-Checks per-skill: VN/EN/JA variants all exist, frontmatter has `name:` + `description:`, `name:` matches the file path (`role:command`).
+Checks per-skill: for Claude skills, each `.claude/skills/<skill>/` folder has `SKILL.md` + `SKILL.en.md` + `SKILL.ja.md`, frontmatter has `name:` + `description:`, and `name:` equals the folder name (`role-command`). OpenCode skills are checked with the nested `role:command` convention.
 
 ### CI (GitHub Actions)
 
-- `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 4 platforms × {ubuntu, windows} on every PR, asserts 96 skill files copied + correct config file present.
+- `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 4 platforms × {ubuntu, windows} on every PR, asserts 102 skill files copied + correct config file present.
 - `.github/workflows/validate-skills.yml` — runs the validator above on every PR.
 
-### Command file anatomy
+### Skill file anatomy
 
-**Claude Code (VN)** — `.claude/commands/[role]/[name].md`:
+**Claude Code (VN)** — `.claude/skills/[role-command]/SKILL.md`:
 
 ```markdown
 ---
-name: role:command
+name: role-command
 description: >
   One-line description for Claude to match triggers.
-  Trigger khi: user nói "...", hoặc gõ /role:command.
+  Trigger khi: user nói "...", hoặc gõ /role-command.
 ---
 
-# Skill: /role:command
+# Skill: /role-command
 **Role**: [Role name]
 **Mục đích**: [Purpose]
 
 ## [Steps with Human Gates]
 ```
 
-**Claude Code (EN)** — `.claude/commands/[role]/[name].en.md`:
+**Claude Code (EN)** — `.claude/skills/[role-command]/SKILL.en.md`:
 
 ```markdown
 ---
-name: role:command
+name: role-command
 description: >
   One-line description in English.
-  Triggers when: user says "...", or types /role:command.
+  Triggers when: user says "...", or types /role-command.
 ---
 
-# Skill: /role:command
+# Skill: /role-command
 **Role**: [Role name]
 **Purpose**: [Purpose]
 ```
 
+Each skill folder bundles `SKILL.md` (VN, auto-loaded) + `SKILL.en.md` + `SKILL.ja.md`. Only `SKILL.md` auto-loads in this repo; the installer's `--lang` flag selects which variant is written as the active `SKILL.md` in the target project.
+
 **OpenCode** — `.opencode/skills/[role]/[name].md` (VN) and `[name].en.md` (EN):
-- Header: `# /role:command` (no "Skill:" prefix)
+- Header: `# /role:command` (no "Skill:" prefix) — OpenCode keeps the `role:command` convention
 - Spawn syntax: `task(subagent_type: "explorer"|"oracle")` instead of `Agent(model: "haiku"|"sonnet")`
 - Gate tool: `question` instead of `AskUserQuestion`
 
-**Cursor** (generated at install) — `.cursor/rules/[role]/[name].mdc`:
+**Cursor** (generated at install) — `.cursor/rules/[role-command].mdc` (flat, one per skill):
 - Frontmatter drops `name:`, keeps `description`, adds `globs: []` + `alwaysApply: false`
-- Header `# /role:command` (Skill: prefix stripped)
+- Header `# /role-command` (Skill: prefix stripped)
 - Body keeps Claude `Agent(...)` blocks, relabelled as `Sub-task Agent(...)` so Cursor Agent treats them as inline subtasks (Cursor is single-agent)
 - Project context: `.cursorrules` at repo root (copied from CLAUDE.md)
 
 **Antigravity** (generated at install) — `.antigravity/skills/[role]/[name].md`:
-- Alias of `.opencode/skills/` (same `task()` / `question()` syntax)
+- Alias of `.opencode/skills/` (same `task()` / `question()` syntax, `role:command` convention)
 - Project context: `AGENTS.md` at repo root
 
 Rules:
-- `name` — must match file path convention (`role:command`)
+- `name` — must equal the skill folder name (`role-command`) for Claude; OpenCode uses `role:command`
 - `description` — used to auto-trigger; VN files include Vietnamese phrases, EN files include English phrases
-- Every command must have at least 1 human gate (`**Chờ confirm.**` in VN, `**Wait for confirm.**` in EN)
+- Every skill must have at least 1 human gate (`**Chờ confirm.**` in VN, `**Wait for confirm.**` in EN)
 
 ### Subagent definitions (`agents/`)
 
@@ -204,14 +205,14 @@ Each agent file defines an **input contract** and **output JSON shape**. When sp
 
 | Agent | Spawned by | Model | Purpose |
 |-------|-----------|-------|--------|
-| `task-reader` | `/dev:analyze` | haiku | Parse issue → structured JSON (no codebase access) |
-| `code-scout` | `/dev:analyze` | haiku | Find relevant files for a task (read-only) |
-| `planner` | `/dev:analyze` | sonnet | Synthesize task + code map → 2-3 implementation options |
-| `diff-reader` | `/dev:pr`, `/docs:update` | haiku | Summarize git diff for PR description |
-| `review-reader` | `/dev:review` | haiku | Parse diff → code/arch/security signals cho 3-lens review |
-| `test-gen` | `/qa:testplan` | sonnet | Generate test cases from spec |
-| `doc-updater` | `/docs:update` | sonnet | Update baseline docs after verification |
-| `pr-resolver` | `/dev:pr` | sonnet | Analyze PR review comments → propose fixes per comment |
+| `task-reader` | `/dev-analyze` | haiku | Parse issue → structured JSON (no codebase access) |
+| `code-scout` | `/dev-analyze` | haiku | Find relevant files for a task (read-only) |
+| `planner` | `/dev-analyze` | sonnet | Synthesize task + code map → 2-3 implementation options |
+| `diff-reader` | `/dev-pr`, `/docs-update` | haiku | Summarize git diff for PR description |
+| `review-reader` | `/dev-review` | haiku | Parse diff → code/arch/security signals cho 3-lens review |
+| `test-gen` | `/qa-testplan` | sonnet | Generate test cases from spec |
+| `doc-updater` | `/docs-update` | sonnet | Update baseline docs after verification |
+| `pr-resolver` | `/dev-pr` | sonnet | Analyze PR review comments → propose fixes per comment |
 
 ### Permissions model
 
@@ -238,13 +239,13 @@ When adding new commands that need shell access, update `settings.json`.
 このフレームワークは日本語ネイティブで利用可能です。
 
 - **インストール**: `npx agentic-development-lifecycle --yes --lang ja`
-- **スキルファイル**: `.claude/commands/<role>/<name>.ja.md` (Claude Code) / `.opencode/skills/<role>/<name>.ja.md` (OpenCode)
-- **トリガー例**:
-  - 「バグ報告を作成して」→ `/qa:bug.ja`
-  - 「設計書を書きたい」→ `/ba:spec.ja`
-  - 「月次保守報告書を作って」→ `/pm:maintain.ja`
-  - 「変更依頼の影響分析」→ `/be:changerequest.ja`
-  - 「引き継ぎ書を作成」→ `/pm:handover.ja`
+- **スキルファイル**: `.claude/skills/<role-command>/SKILL.ja.md` (Claude Code) / `.opencode/skills/<role>/<name>.ja.md` (OpenCode)
+- **トリガー例** (`--lang ja` でインストール時、スキル名はサフィックスなし):
+  - 「バグ報告を作成して」→ `/qa-bug`
+  - 「設計書を書きたい」→ `/ba-spec`
+  - 「月次保守報告書を作って」→ `/pm-maintain`
+  - 「変更依頼の影響分析」→ `/be-changerequest`
+  - 「引き継ぎ書を作成」→ `/pm-handover`
 - **用語集**: `templates/jp-vn-en-glossary.md` (JP-VN-EN 70+ 用語)
 - **ロールガイド**: `docs/workflows/role-guide.ja.md`
 - **スプリントフロー**: `docs/workflows/sprint-lifecycle.ja.md`
@@ -280,18 +281,18 @@ When adding new commands that need shell access, update `settings.json`.
 ## Cấu trúc thư mục
 
 ```
-.claude/commands/         # Canonical source — Skills (VN) + .en.md + .ja.md cho Claude Code
-.opencode/skills/         # Hand port cho OpenCode (task() / question() syntax)
-agents/                   # Subagent definitions (spawned bởi orchestrator commands)
+.claude/skills/           # Canonical source — Agent Skills, 1 folder/skill: SKILL.md (VN) + SKILL.en.md + SKILL.ja.md
+.opencode/skills/         # Hand port cho OpenCode (task() / question() syntax, role:command)
+agents/                   # Subagent definitions (spawned bởi orchestrator skills)
 bin/
   install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --lite
   CLAUDE.lite.md          # Dropped-in as CLAUDE.md when --lite is set
   transformers/
-    cursor.js             # Transform .claude/commands/*.md → .cursor/rules/*.mdc at install
+    cursor.js             # Transform .claude/skills/*/SKILL.md → .cursor/rules/*.mdc at install
     antigravity.js        # Alias .opencode/skills/ → .antigravity/skills/ at install
 docs/
   tasks/                  # Task docs (Type 1) — mỗi issue 1 folder, kèm audit.md
-  baseline/               # Codebase reverse-engineering output (từ /ba:reverse)
+  baseline/               # Codebase reverse-engineering output (từ /ba-reverse)
   screens/                # Screen baseline docs (Type 2)
   api/                    # API baseline docs (Type 2)
   decisions/              # Architecture Decision Records (ADR)
@@ -306,37 +307,37 @@ setup.ps1 / setup.sh      # Shell-based installer alternatives (Claude Code only
 
 | Role | Command | Chức năng |
 |------|---------|----------|
-| BE | `/be:bridge` | Requirement JP → Clarify ambiguity → Spec cho team VN |
-| BE | `/be:changerequest` | 変更依頼 — impact analysis, approval trail, version control spec changes |
-| BE | `/be:glossary` | Duy trì glossary JP-VN-EN — thêm term mới, resolve conflict dịch thuật |
-| PM / BA | `/pm:ideate` | Ý tưởng mờ → Concept rõ (trước /ba:spec) |
-| PM | `/pm:kickoff` | Bootstrap greenfield project: tech stack → ADRs → docs structure → sprint 0 checklist |
-| BA | `/ba:spec` | Raw requirement → Structured spec |
-| BA | `/ba:user-story` | Spec → User Stories + AC |
-| BA / Tech Lead | `/ba:reverse` | Reverse engineer codebase brownfield → baseline docs (take-over, audit) |
-| PM | `/pm:breakdown` | Epic → Tasks với estimate, tạo GitHub Issues |
-| PM | `/pm:status` | Sprint status report |
-| PM | `/pm:dashboard` | Generate static HTML dashboard từ `docs/tasks/*/` — kanban + health table + backlog |
-| PM | `/pm:release` | Tạo Release Notes / リリースノート từ merged PRs + closed issues |
-| PM | `/pm:handover` | Tạo gói bàn giao dự án (引き継ぎ) — codebase map + decisions + contact matrix |
-| PM | `/pm:maintain` | Workflow maintenance phase: triage → fix → monthly report (月次保守報告書) |
-| Dev | `/dev:analyze` | Task → Implementation options (multi-agent) |
-| Dev | `/dev:implement` | Implement theo analysis.md, file-by-file với gates (hỗ trợ TDD lane opt-in) |
-| Dev | `/dev:review` | Review toàn diện: code quality + architecture + performance + security trong 1 lần |
-| Dev | `/dev:pr` | Code changes → PR description (hỗ trợ PR comment resolver) |
-| Dev | `/dev:debug` | Systematic debugging: reproduce → localize → fix |
-| Arch | `/arch:review` | Review design decision |
-| Arch | `/arch:adr` | Generate Architecture Decision Record |
-| QA | `/qa:testplan` | Spec → Test plan |
-| QA | `/qa:bug` | Standardized bug report |
-| QA | `/qa:regression` | Regression test checklist trước release |
-| DevOps | `/ops:deploy` | Deployment checklist + CI quality gate |
-| DevOps | `/ops:incident` | Incident response + RCA |
-| SM | `/sm:standup` | Daily standup summary |
-| SM | `/sm:retro` | Sprint retrospective |
-| All | `/sec:review` | Security review trước merge (3-tier: Always/Ask First/Never) |
-| All | `/docs:update` | Update baseline screen/API docs sau verify |
-| All | `/docs:project` | Sync project-level docs: README, workflow guides, install scripts, CLAUDE.md |
+| BE | `/be-bridge` | Requirement JP → Clarify ambiguity → Spec cho team VN |
+| BE | `/be-changerequest` | 変更依頼 — impact analysis, approval trail, version control spec changes |
+| BE | `/be-glossary` | Duy trì glossary JP-VN-EN — thêm term mới, resolve conflict dịch thuật |
+| PM / BA | `/pm-ideate` | Ý tưởng mờ → Concept rõ (trước /ba-spec) |
+| PM | `/pm-kickoff` | Bootstrap greenfield project: tech stack → ADRs → docs structure → sprint 0 checklist |
+| BA | `/ba-spec` | Raw requirement → Structured spec |
+| BA | `/ba-user-story` | Spec → User Stories + AC |
+| BA / Tech Lead | `/ba-reverse` | Reverse engineer codebase brownfield → baseline docs (take-over, audit) |
+| PM | `/pm-breakdown` | Epic → Tasks với estimate, tạo GitHub Issues |
+| PM | `/pm-status` | Sprint status report |
+| PM | `/pm-dashboard` | Generate static HTML dashboard từ `docs/tasks/*/` — kanban + health table + backlog |
+| PM | `/pm-release` | Tạo Release Notes / リリースノート từ merged PRs + closed issues |
+| PM | `/pm-handover` | Tạo gói bàn giao dự án (引き継ぎ) — codebase map + decisions + contact matrix |
+| PM | `/pm-maintain` | Workflow maintenance phase: triage → fix → monthly report (月次保守報告書) |
+| Dev | `/dev-analyze` | Task → Implementation options (multi-agent) |
+| Dev | `/dev-implement` | Implement theo analysis.md, file-by-file với gates (hỗ trợ TDD lane opt-in) |
+| Dev | `/dev-review` | Review toàn diện: code quality + architecture + performance + security trong 1 lần |
+| Dev | `/dev-pr` | Code changes → PR description (hỗ trợ PR comment resolver) |
+| Dev | `/dev-debug` | Systematic debugging: reproduce → localize → fix |
+| Arch | `/arch-review` | Review design decision |
+| Arch | `/arch-adr` | Generate Architecture Decision Record |
+| QA | `/qa-testplan` | Spec → Test plan |
+| QA | `/qa-bug` | Standardized bug report |
+| QA | `/qa-regression` | Regression test checklist trước release |
+| DevOps | `/ops-deploy` | Deployment checklist + CI quality gate |
+| DevOps | `/ops-incident` | Incident response + RCA |
+| SM | `/sm-standup` | Daily standup summary |
+| SM | `/sm-retro` | Sprint retrospective |
+| All | `/sec-review` | Security review trước merge (3-tier: Always/Ask First/Never) |
+| All | `/docs-update` | Update baseline screen/API docs sau verify |
+| All | `/docs-project` | Sync project-level docs: README, workflow guides, install scripts, CLAUDE.md |
 | All | `/install` | Cài Agentic Development Lifecycle vào project hiện tại — copy commands, agents, templates, workflows |
 
 ---
@@ -436,7 +437,7 @@ Subagent definitions: `agents/` folder.
 - `audit.md` — append-only log mọi skill chạy + user input verbatim (template: `templates/audit.md`)
 
 **Type 2 — Baseline Docs** (cập nhật sau verify)
-- `docs/baseline/codebase-overview.md` — codebase map từ `/ba:reverse` (brownfield only)
+- `docs/baseline/codebase-overview.md` — codebase map từ `/ba-reverse` (brownfield only)
 - `docs/screens/[feature]/screen.md` — (template: `templates/baseline-screen.md`)
 - `docs/api/[domain]/[endpoint].md` — (template: `templates/baseline-api.md`)
 - `docs/decisions/ADR-XXX.md` — (template: `templates/adr.md`)
@@ -461,11 +462,11 @@ Tham khảo bài viết Thariq Shihipar — *"The Unreasonable Effectiveness of 
 
 | Skill | Format chính | HTML companion (one-shot, không commit) |
 |-------|-------------|------------------------------------------|
-| `/dev:analyze` | MD (`analysis.md`) | `analysis-compare.html` — sort/filter phương án |
-| `/qa:testplan` | MD (`test-plan.md`) | `test-plan.html` — checklist tick + localStorage |
-| `/qa:regression` | HTML | `regression-checklist.html` — go/no-go decision |
-| `/pm:status` | HTML | `sprint-status.html` — kanban + velocity |
-| `/be:bridge` | MD + HTML | `deliverable.html` — 2 cột JP/VN, copy button |
+| `/dev-analyze` | MD (`analysis.md`) | `analysis-compare.html` — sort/filter phương án |
+| `/qa-testplan` | MD (`test-plan.md`) | `test-plan.html` — checklist tick + localStorage |
+| `/qa-regression` | HTML | `regression-checklist.html` — go/no-go decision |
+| `/pm-status` | HTML | `sprint-status.html` — kanban + velocity |
+| `/be-bridge` | MD + HTML | `deliverable.html` — 2 cột JP/VN, copy button |
 | Còn lại (27 skill) | MD | (xem nhóm B trong `docs/analysis/html-effectiveness-thariq.md` để mở rộng khi cần) |
 
 HTML artifact dùng template `templates/html-artifact.html` (interactive) hoặc `templates/html-bilingual.html` (JP-VN). File HTML one-shot KHÔNG commit — `.gitignore` loại trừ `docs/tasks/**/*.html`.
@@ -493,7 +494,7 @@ Khi cần gửi tài liệu cho khách JP, format theo:
 | 単体テスト仕様書 (UT Spec) | `docs/tasks/[TASK]/test-plan.md` |
 | 単体テスト結果 (UT Result) | `docs/tasks/[TASK]/verification.md` |
 
-BE dùng `/be:bridge` để review và format lại trước khi gửi khách.
+BE dùng `/be-bridge` để review và format lại trước khi gửi khách.
 
 ---
 

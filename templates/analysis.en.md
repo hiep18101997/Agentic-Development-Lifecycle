@@ -64,4 +64,4 @@ lang: en
 <!-- Side effects, migration risks, rollback strategy, feature flag recommendation -->
 
 ---
-<!-- Created by /dev:analyze. See analysis-compare.html to sort/filter options. -->
+<!-- Created by /dev-analyze. See analysis-compare.html to sort/filter options. -->

@@ -66,7 +66,7 @@ npx agentic-development-lifecycle --yes --opencode
 npx agentic-development-lifecycle --yes --cursor
 ```
 
-Generates `.cursor/rules/<role>/<name>.mdc` + `.cursorrules` (project context). Cursor Agent auto-attaches rules based on the `description` frontmatter. Single-agent runtime — multi-agent skills (e.g. `/dev:analyze`) execute inline.
+Generates `.cursor/rules/<role>/<name>.mdc` + `.cursorrules` (project context). Cursor Agent auto-attaches rules based on the `description` frontmatter. Single-agent runtime — multi-agent skills (e.g. `/dev-analyze`) execute inline.
 
 ### Antigravity
 
@@ -89,7 +89,7 @@ npx agentic-development-lifecycle --yes --lang vi      # Vietnamese only (defaul
 npx agentic-development-lifecycle --yes --lang all     # All variants (default)
 ```
 
-When using `--lang ja` or `--lang en`, skills are installed **without the language suffix** — so `/ba:spec` not `/ba:spec.ja`. The Japanese skill file `ba/spec.ja.md` is installed as `ba/spec.md`, replacing the Vietnamese base. Files with no translated variant fall back to the Vietnamese base automatically.
+When using `--lang ja` or `--lang en`, one folder per skill is installed and the chosen language becomes the active `SKILL.md` — so you invoke `/ba-spec` (no language suffix). The Japanese variant `.claude/skills/ba-spec/SKILL.ja.md` is written as `.claude/skills/ba-spec/SKILL.md`, replacing the Vietnamese base. Skills with no translated variant fall back to the Vietnamese base automatically. (`--lang all`, the default, instead fans each skill out to `ba-spec/`, `ba-spec-en/`, `ba-spec-ja/`.)
 
 ### Developer Lite (minimal install)
 
@@ -99,7 +99,7 @@ Just want the developer workflow without PM/BA/QA/Ops overhead?
 npx agentic-development-lifecycle --yes --lite
 ```
 
-Installs only 8 skills: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update` (Claude Code only). Combine with `--lang ja` or `--lang en` to pick a language. Upgrade to the full framework later with `npx agentic-development-lifecycle --update --yes`.
+Installs only 8 skills: `/dev-analyze` `/dev-implement` `/dev-review` `/dev-pr` `/dev-debug` `/sec-review` `/arch-adr` `/docs-update` (Claude Code only). Combine with `--lang ja` or `--lang en` to pick a language. Upgrade to the full framework later with `npx agentic-development-lifecycle --update --yes`.
 
 ---
 
@@ -109,77 +109,77 @@ Installs only 8 skills: `/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` 
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/pm:ideate` | Refine vague idea → clear concept with problem statement + NOT Doing list | Rough idea → Concept doc |
-| `/ba:spec` | Raw requirement → structured spec | Requirements → `requirements.md` |
-| `/ba:user-story` | Spec → User Stories with AC | Spec → User Stories |
-| `/ba:reverse` | Reverse engineer legacy codebase → baseline docs | Codebase → `docs/baseline/` |
-| `/be:bridge` | Translate JP requirements, create bilingual JP-VN deliverables | JP req → VN spec + JP doc |
-| `/be:changerequest` | 変更依頼 — impact analysis, approval trail, version control spec changes | CR → Impact analysis + JP doc |
-| `/be:glossary` | Maintain JP↔VN↔EN glossary — add terms, resolve translation conflicts | New term → Glossary update |
+| `/pm-ideate` | Refine vague idea → clear concept with problem statement + NOT Doing list | Rough idea → Concept doc |
+| `/ba-spec` | Raw requirement → structured spec | Requirements → `requirements.md` |
+| `/ba-user-story` | Spec → User Stories with AC | Spec → User Stories |
+| `/ba-reverse` | Reverse engineer legacy codebase → baseline docs | Codebase → `docs/baseline/` |
+| `/be-bridge` | Translate JP requirements, create bilingual JP-VN deliverables | JP req → VN spec + JP doc |
+| `/be-changerequest` | 変更依頼 — impact analysis, approval trail, version control spec changes | CR → Impact analysis + JP doc |
+| `/be-glossary` | Maintain JP↔VN↔EN glossary — add terms, resolve translation conflicts | New term → Glossary update |
 
 ### Project Management
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/pm:breakdown` | Epic/Stories → Tasks with estimates + GitHub/GitLab Issues | Epic → Issues |
-| `/pm:status` | Sprint status report for stakeholders | Tasks → Status report |
-| `/pm:dashboard` | Static HTML sprint dashboard (kanban + health + backlog) | `docs/tasks/*/` → HTML |
-| `/pm:kickoff` | Bootstrap greenfield project: tech stack → ADRs → docs structure → sprint 0 checklist | Requirement → Project scaffold |
-| `/pm:release` | Generate Release Notes / リリースノート from merged PRs + closed issues | PRs + Issues → Release Notes |
-| `/pm:handover` | Create project handover package (引き継ぎ) — codebase map + decisions + contact matrix | Project → Handover package |
-| `/pm:maintain` | Maintenance phase workflow: triage → fix → monthly report (月次保守報告書) | Incident → Fix + Report |
+| `/pm-breakdown` | Epic/Stories → Tasks with estimates + GitHub/GitLab Issues | Epic → Issues |
+| `/pm-status` | Sprint status report for stakeholders | Tasks → Status report |
+| `/pm-dashboard` | Static HTML sprint dashboard (kanban + health + backlog) | `docs/tasks/*/` → HTML |
+| `/pm-kickoff` | Bootstrap greenfield project: tech stack → ADRs → docs structure → sprint 0 checklist | Requirement → Project scaffold |
+| `/pm-release` | Generate Release Notes / リリースノート from merged PRs + closed issues | PRs + Issues → Release Notes |
+| `/pm-handover` | Create project handover package (引き継ぎ) — codebase map + decisions + contact matrix | Project → Handover package |
+| `/pm-maintain` | Maintenance phase workflow: triage → fix → monthly report (月次保守報告書) | Incident → Fix + Report |
 
 ### Development
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/dev:analyze` | Task → 2-3 implementation options with trade-offs | Issue + codebase → `analysis.md` |
-| `/dev:implement` | Implement file-by-file with human gates + verification + harness delta check | `analysis.md` → Code → `verification.md` |
-| `/dev:review` | Holistic review after implement: code quality + architecture + security in one run | Diff + `analysis.md` → Review report → Approve / Request Changes |
-| `/dev:pr` | Generate PR description | Code diff → PR description |
-| `/dev:debug` | Structured debugging: reproduce → localize → fix | Bug report → Fix |
+| `/dev-analyze` | Task → 2-3 implementation options with trade-offs | Issue + codebase → `analysis.md` |
+| `/dev-implement` | Implement file-by-file with human gates + verification + harness delta check | `analysis.md` → Code → `verification.md` |
+| `/dev-review` | Holistic review after implement: code quality + architecture + security in one run | Diff + `analysis.md` → Review report → Approve / Request Changes |
+| `/dev-pr` | Generate PR description | Code diff → PR description |
+| `/dev-debug` | Structured debugging: reproduce → localize → fix | Bug report → Fix |
 
 ### Architecture
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/arch:review` | Design decision review | Design → Feedback |
-| `/arch:adr` | Create Architecture Decision Record | Decision → `docs/decisions/ADR-NNN.md` |
+| `/arch-review` | Design decision review | Design → Feedback |
+| `/arch-adr` | Create Architecture Decision Record | Decision → `docs/decisions/ADR-NNN.md` |
 
 ### QA
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/qa:testplan` | Spec → Test plan | Spec → `test-plan.md` |
-| `/qa:bug` | Standardized bug report | Bug info → Bug report |
-| `/qa:regression` | Regression checklist before release | Release → Go/No-go checklist |
+| `/qa-testplan` | Spec → Test plan | Spec → `test-plan.md` |
+| `/qa-bug` | Standardized bug report | Bug info → Bug report |
+| `/qa-regression` | Regression checklist before release | Release → Go/No-go checklist |
 
 ### DevOps
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/ops:deploy` | Deployment checklist + CI quality gate + rollback plan | Release → Checklist |
-| `/ops:incident` | Incident triage + parallel investigation + RCA template | Incident → RCA |
+| `/ops-deploy` | Deployment checklist + CI quality gate + rollback plan | Release → Checklist |
+| `/ops-incident` | Incident triage + parallel investigation + RCA template | Incident → RCA |
 
 ### Security
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/sec:review` | Security review: Always check / Ask First / Never (OWASP Top 10) | Code → Security report |
+| `/sec-review` | Security review: Always check / Ask First / Never (OWASP Top 10) | Code → Security report |
 
 ### Documentation
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/docs:update` | Update baseline screen/API docs after task verify | Verified task → Updated docs |
-| `/docs:project` | Sync project-level docs: README, workflow guides, CLAUDE.md | Changes → Updated project docs |
+| `/docs-update` | Update baseline screen/API docs after task verify | Verified task → Updated docs |
+| `/docs-project` | Sync project-level docs: README, workflow guides, CLAUDE.md | Changes → Updated project docs |
 
 ### Scrum
 
 | Command | What it does | Input → Output |
 |---------|-------------|----------------|
-| `/sm:standup` | Daily standup summary | Updates → Standup report |
-| `/sm:retro` | Sprint retrospective | Sprint → Retro report |
+| `/sm-standup` | Daily standup summary | Updates → Standup report |
+| `/sm-retro` | Sprint retrospective | Sprint → Retro report |
 
 ---
 
@@ -219,14 +219,14 @@ Heavy tasks spawn lightweight subagents to keep context clean:
 
 | Agent | Used by | Claude Code | OpenCode | Purpose |
 |-------|---------|-------------|----------|---------|
-| `task-reader` | `/dev:analyze` | haiku | explorer | Parse issue → structured JSON |
-| `code-scout` | `/dev:analyze` | haiku | explorer | Find relevant files |
-| `planner` | `/dev:analyze` | sonnet | oracle | Synthesize options |
-| `diff-reader` | `/dev:pr`, `/docs:update` | haiku | explorer | Map diff → AC coverage |
-| `review-reader` | `/dev:review` | haiku | explorer | Parse diff → code/arch/security signals |
-| `test-gen` | `/qa:testplan` | sonnet | oracle | Generate test cases |
-| `doc-updater` | `/docs:update` | sonnet | oracle | Update baseline docs |
-| `pr-resolver` | `/dev:pr` | sonnet | oracle | Analyze review comments → fixes |
+| `task-reader` | `/dev-analyze` | haiku | explorer | Parse issue → structured JSON |
+| `code-scout` | `/dev-analyze` | haiku | explorer | Find relevant files |
+| `planner` | `/dev-analyze` | sonnet | oracle | Synthesize options |
+| `diff-reader` | `/dev-pr`, `/docs-update` | haiku | explorer | Map diff → AC coverage |
+| `review-reader` | `/dev-review` | haiku | explorer | Parse diff → code/arch/security signals |
+| `test-gen` | `/qa-testplan` | sonnet | oracle | Generate test cases |
+| `doc-updater` | `/docs-update` | sonnet | oracle | Update baseline docs |
+| `pr-resolver` | `/dev-pr` | sonnet | oracle | Analyze review comments → fixes |
 
 ### Human Gates
 
@@ -244,22 +244,22 @@ Every skill has at least 1 human gate — skills present options and **wait for 
 ### Full sprint (end to end)
 
 ```
-/pm:ideate → /ba:spec → /ba:user-story → /pm:breakdown
+/pm-ideate → /ba-spec → /ba-user-story → /pm-breakdown
 
     ↓ (per task)
 
-/dev:analyze → [review analysis.md] → /dev:implement
-    → /dev:review → /dev:pr
+/dev-analyze → [review analysis.md] → /dev-implement
+    → /dev-review → /dev-pr
 ```
 
 ### Developer flow (single task)
 
 ```
-/dev:analyze → [review analysis.md] → /dev:implement → /dev:review → /dev:pr
+/dev-analyze → [review analysis.md] → /dev-implement → /dev-review → /dev-pr
 ```
 
-> **`/dev:analyze`** classifies risk first (tiny / normal / high-risk), then stops after writing `analysis.md`. Review it, then trigger `/dev:implement` manually.  
-> **`/dev:implement`** stops after writing `verification.md` (diff review + self-test results), then prompts a Harness Delta check. Then trigger `/dev:review` — 3-lens report (code quality, architecture, security). After Approve, trigger `/dev:pr`.
+> **`/dev-analyze`** classifies risk first (tiny / normal / high-risk), then stops after writing `analysis.md`. Review it, then trigger `/dev-implement` manually.  
+> **`/dev-implement`** stops after writing `verification.md` (diff review + self-test results), then prompts a Harness Delta check. Then trigger `/dev-review` — 3-lens report (code quality, architecture, security). After Approve, trigger `/dev-pr`.
 
 Full step-by-step: [`docs/workflows/sprint-lifecycle.md`](docs/workflows/sprint-lifecycle.md)  
 Who uses which skill: [`docs/workflows/role-guide.md`](docs/workflows/role-guide.md)
@@ -285,7 +285,7 @@ docs/
 ```
 
 **Type 1** (task docs): Created per issue, gitignored in this framework repo. Your project keeps them.  
-**Type 2** (baseline docs): Updated after each verified task merge via `/docs:update`.
+**Type 2** (baseline docs): Updated after each verified task merge via `/docs-update`.
 
 ---
 
@@ -293,8 +293,8 @@ docs/
 
 Designed for consulting/outsource teams with structured client communication:
 
-- **Bridge Engineer** — translates client requirements → team spec (`/be:bridge`)
-- **BA** — writes spec from clarified requirements (`/ba:spec`)
+- **Bridge Engineer** — translates client requirements → team spec (`/be-bridge`)
+- **BA** — writes spec from clarified requirements (`/ba-spec`)
 - **Dev** — implements with structured AI guidance, code comments in English
 - **QA** — tests per spec, generates formatted test reports if needed
 - **Deliverables** — 設計書, 単体テスト仕様書, 成果物 formatted for Japanese clients
@@ -304,13 +304,13 @@ Designed for consulting/outsource teams with structured client communication:
 ## Project Structure
 
 ```
-.claude/commands/         # 32 Claude Code slash command files (canonical source)
+.claude/skills/           # 32 Claude Code Agent Skills, one folder per skill with SKILL.md (canonical source)
 .opencode/skills/         # 32 OpenCode skill files (hand-ported — task()/question() syntax)
 agents/                   # 8 subagent definitions (Claude Code only)
 bin/
   install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity
   transformers/
-    cursor.js             # .claude/commands/*.md → .cursor/rules/*.mdc at install time
+    cursor.js             # .claude/skills/*/SKILL.md → .cursor/rules/*.mdc at install time
     antigravity.js        # .opencode/skills/ → .antigravity/skills/ alias
 docs/
   workflows/              # Sprint lifecycle, role guide, flowchart
@@ -324,7 +324,7 @@ setup.sh                  # Bash installer (Claude Code)
 
 ## Development
 
-This repo IS the framework. The canonical source lives in `.claude/commands/` (32 files × 3 languages = 96 files). The `.opencode/skills/` tree is a hand-maintained port. Cursor and Antigravity targets are generated at install time by transformers in `bin/transformers/` — no separate source files to keep in sync.
+This repo IS the framework. The canonical source lives in `.claude/skills/` (32 skill folders × 3 languages = 96 files). The `.opencode/skills/` tree is a hand-maintained port. Cursor and Antigravity targets are generated at install time by transformers in `bin/transformers/` — no separate source files to keep in sync.
 
 ### Test skill triggering
 

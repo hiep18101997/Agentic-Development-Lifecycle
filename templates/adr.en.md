@@ -82,7 +82,7 @@ lang: en
 
 Examples:
 - "After implementation, run a load test confirming p95 < 200ms at 500 RPS"
-- "Peer review checklist item #5 in /dev:review must pass"
+- "Peer review checklist item #5 in /dev-review must pass"
 - "CI pipeline must include a step checking [X] before merge"
 ]
 

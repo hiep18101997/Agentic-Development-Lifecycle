@@ -89,11 +89,11 @@ lang: ja
 
 ## 対応済みPR・Issue一覧
 
-<!-- 本リリースにマージ / クローズされたPR・Issue — /pm:release により自動生成 -->
+<!-- 本リリースにマージ / クローズされたPR・Issue — /pm-release により自動生成 -->
 
 | PR/Issue | タイトル | 種別 |
 |----------|----------|------|
 | #[N] | [...] | 機能追加 / バグ修正 / リファクタリング |
 
 ---
-<!-- Template version: 1.0 | /pm:release スキルで生成 | 準拠フォーマット: Keep a Changelog (keepachangelog.com) -->
+<!-- Template version: 1.0 | /pm-release スキルで生成 | 準拠フォーマット: Keep a Changelog (keepachangelog.com) -->

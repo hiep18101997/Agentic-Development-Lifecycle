@@ -67,4 +67,4 @@ lang: en
 **Sign-off notes**: [Conditions or exceptions accepted, if any]
 
 ---
-<!-- Created by /dev:implement. After pass, run /dev:pr to create PR. -->
+<!-- Created by /dev-implement. After pass, run /dev-pr to create PR. -->

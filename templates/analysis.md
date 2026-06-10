@@ -64,4 +64,4 @@ lang: vi
 <!-- Side effects, migration risks, rollback strategy, feature flag recommendation -->
 
 ---
-<!-- Tạo bởi /dev:analyze. Xem analysis-compare.html để so sánh phương án có thể sort/filter. -->
+<!-- Tạo bởi /dev-analyze. Xem analysis-compare.html để so sánh phương án có thể sort/filter. -->

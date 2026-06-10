@@ -61,4 +61,4 @@ lang: vi
 **Rui ro thang toi**: [Mo ta rui ro du kien va bien phap]
 
 ---
-<!-- Template version: 1.0 | Tao boi /pm:maintain -->
+<!-- Template version: 1.0 | Tao boi /pm-maintain -->

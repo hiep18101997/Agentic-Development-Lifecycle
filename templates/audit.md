@@ -14,7 +14,7 @@ _Append-only log: mọi user input verbatim + agent decision với timestamp JST
 
 ---
 
-## [YYYY-MM-DD HH:mm JST] · skill=`/ba:spec` · round=1 · commit=`[short-sha]`
+## [YYYY-MM-DD HH:mm JST] · skill=`/ba-spec` · round=1 · commit=`[short-sha]`
 
 **User input** (verbatim):
 > [Paste exact text user said]
@@ -25,7 +25,7 @@ _Append-only log: mọi user input verbatim + agent decision với timestamp JST
 
 ---
 
-## [YYYY-MM-DD HH:mm JST] · skill=`/dev:analyze` · agent=planner · commit=`[short-sha]`
+## [YYYY-MM-DD HH:mm JST] · skill=`/dev-analyze` · agent=planner · commit=`[short-sha]`
 
 **User input** (verbatim):
 > [...]

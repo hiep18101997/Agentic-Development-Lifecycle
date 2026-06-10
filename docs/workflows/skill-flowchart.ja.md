@@ -15,60 +15,60 @@ flowchart TD
 
     %% ── Discovery ──
     subgraph DISC ["🔍 Discovery"]
-        BRIDGE["/be:bridge 🌐\nBridge Engineer"]
-        IDEATE["/pm:ideate\nPM · BA"]
-        REVERSE["/ba:reverse\nBA · Tech Lead"]
+        BRIDGE["/be-bridge 🌐\nBridge Engineer"]
+        IDEATE["/pm-ideate\nPM · BA"]
+        REVERSE["/ba-reverse\nBA · Tech Lead"]
         BASELINE[(docs/baseline/<br/>codebase-overview.md)]
     end
 
     %% ── Planning ──
     subgraph PLAN ["📋 Planning"]
-        SPEC["/ba:spec\nBA"]
-        STORY["/ba:user-story\nBA"]
-        BREAKDOWN["/pm:breakdown\nPM"]
+        SPEC["/ba-spec\nBA"]
+        STORY["/ba-user-story\nBA"]
+        BREAKDOWN["/pm-breakdown\nPM"]
         ISSUES[(GitHub Issues)]
     end
 
     %% ── Architecture ──
     subgraph ARCH ["🏛️ Architecture（横断）"]
-        ARCH_REV["/arch:review\nTech Lead"]
-        ADR["/arch:adr\nTech Lead"]
+        ARCH_REV["/arch-review\nTech Lead"]
+        ADR["/arch-adr\nTech Lead"]
     end
 
     %% ── Dev per Issue ──
     subgraph DEV ["💻 Dev サイクル — Issue ごと"]
         RISK["🔵 リスク分類器\ndocs/risk-classifier.ja.md"]
-        ANALYZE["/dev:analyze 🌐\nDev"]
-        IMPLEMENT["/dev:implement\nDev"]
+        ANALYZE["/dev-analyze 🌐\nDev"]
+        IMPLEMENT["/dev-implement\nDev"]
         VERIFY["✅ 検証ゲート\nユーザーがテスト結果報告"]
         HARNESS["📝 ハーネスデルタ\ndocs/improvement-backlog.md"]
-        DEBUG["/dev:debug\nDev"]
-        DEVREVIEW["/dev:review\nDev · Tech Lead"]
-        PR["/dev:pr\nDev"]
+        DEBUG["/dev-debug\nDev"]
+        DEVREVIEW["/dev-review\nDev · Tech Lead"]
+        PR["/dev-pr\nDev"]
     end
 
     %% ── QA ──
     subgraph QA ["🧪 QA サイクル"]
-        TESTPLAN["/qa:testplan 🌐\nQA"]
-        BUGR["/qa:bug\nQA"]
-        REGRESSION["/qa:regression 🌐\nQA"]
+        TESTPLAN["/qa-testplan 🌐\nQA"]
+        BUGR["/qa-bug\nQA"]
+        REGRESSION["/qa-regression 🌐\nQA"]
     end
 
     %% ── Sprint Ops ──
     subgraph SPRINT ["📊 スプリント運用（反復）"]
-        STANDUP["/sm:standup\ndaily"]
-        STATUS["/pm:status 🌐\nper sprint"]
-        RETRO["/sm:retro\nsprint end"]
+        STANDUP["/sm-standup\ndaily"]
+        STATUS["/pm-status 🌐\nper sprint"]
+        RETRO["/sm-retro\nsprint end"]
     end
 
     %% ── Release ──
     subgraph REL ["🚀 リリース"]
-        DEPLOY["/ops:deploy\nDevOps"]
-        INCIDENT["/ops:incident\nDevOps"]
+        DEPLOY["/ops-deploy\nDevOps"]
+        INCIDENT["/ops-incident\nDevOps"]
     end
 
     %% ── マージ後 ──
-    DOCS["/docs:update\nDev · QA"]
+    DOCS["/docs-update\nDev · QA"]
 
     %% Entry
     JP --> BRIDGE
@@ -141,54 +141,54 @@ flowchart TD
 
 ### Bridge Engineer — JP 受託開始
 ```
-JP 顧客 → /be:bridge → /ba:spec (VN) + 設計書 (JP)
+JP 顧客 → /be-bridge → /ba-spec (VN) + 設計書 (JP)
 ```
 
 ### ブラウンフィールドオンボーディング — レガシーコードベース引き継ぎ
 ```
-レガシーコードベース → /ba:reverse → docs/baseline/codebase-overview.md
-                                  → [オプション /be:bridge JP レビュー]
-                                  → /ba:spec（コンテキスト付き新機能向け）
+レガシーコードベース → /ba-reverse → docs/baseline/codebase-overview.md
+                                  → [オプション /be-bridge JP レビュー]
+                                  → /ba-spec（コンテキスト付き新機能向け）
 ```
 
 ### PM / BA — Discovery → Planning
 ```
-/pm:ideate → /ba:spec → /ba:user-story → /pm:breakdown → Issues
+/pm-ideate → /ba-spec → /ba-user-story → /pm-breakdown → Issues
 ```
 
 ### Dev — Issue ごと
 ```
 Issue → リスク分類器（tiny/normal/high-risk）
-    [normal] → /dev:analyze → [analysis.md レビュー]
-                    → /dev:implement → [テスト結果報告 → verification.md]
+    [normal] → /dev-analyze → [analysis.md レビュー]
+                    → /dev-implement → [テスト結果報告 → verification.md]
                     → [ハーネスデルタチェック]
-                    → /dev:review → /dev:pr → /docs:update
+                    → /dev-review → /dev-pr → /docs-update
                          ↕（バグ）
-                     /dev:debug
+                     /dev-debug
     [tiny]  → 直接パッチ
-    [high-risk] → シニア確認 → /dev:analyze → ...
+    [high-risk] → シニア確認 → /dev-analyze → ...
 ```
 
 ### QA — Dev と並列
 ```
-/ba:spec ──→ /qa:testplan ──→ テスト
+/ba-spec ──→ /qa-testplan ──→ テスト
                                  ↓（バグ発見）
-                             /qa:bug → /dev:debug → 再テスト
+                             /qa-bug → /dev-debug → 再テスト
                                  ↓（リリース前）
-                            /qa:regression → /ops:deploy
+                            /qa-regression → /ops-deploy
 ```
 
 ### Architecture — スプリント横断
 ```
-/arch:review ←──→ /arch:adr
+/arch-review ←──→ /arch-adr
      ↑                 ↑
 Planning          Dev 判断
 ```
 
 ### Sprint Ops — Scrum 儀式
 ```
-/sm:standup（daily） ──→ /sm:retro（sprint end）
-                    ──→ /pm:status（オンデマンド）
+/sm-standup（daily） ──→ /sm-retro（sprint end）
+                    ──→ /pm-status（オンデマンド）
 ```
 
 ---
@@ -197,15 +197,15 @@ Planning          Dev 判断
 
 | スキル | 実行前要件 |
 |-------|------------------------|
-| `/ba:user-story` | `/ba:spec` 完了 |
-| `/pm:breakdown` | `/ba:user-story` または既存ユーザーストーリー |
-| `/dev:analyze` | リスク分類器実行済（`docs/risk-classifier.ja.md` 参照）+ Issue/タスク明確（AC 定義済） |
-| `/dev:implement` | `docs/tasks/[ID]/analysis.md` 存在 |
-| `/dev:review` | `/dev:implement` ステップ 5 完了 + `verification.md` 保存 + ハーネスデルタチェック完了 |
-| `/dev:pr` | `/dev:review` Approve + ブロッキング Issue なし |
-| `/docs:update` | PR マージ済 |
-| `/qa:regression` | スプリント内全 PR マージ済 |
-| `/ops:deploy` | `/qa:regression` サインオフ済 |
+| `/ba-user-story` | `/ba-spec` 完了 |
+| `/pm-breakdown` | `/ba-user-story` または既存ユーザーストーリー |
+| `/dev-analyze` | リスク分類器実行済（`docs/risk-classifier.ja.md` 参照）+ Issue/タスク明確（AC 定義済） |
+| `/dev-implement` | `docs/tasks/[ID]/analysis.md` 存在 |
+| `/dev-review` | `/dev-implement` ステップ 5 完了 + `verification.md` 保存 + ハーネスデルタチェック完了 |
+| `/dev-pr` | `/dev-review` Approve + ブロッキング Issue なし |
+| `/docs-update` | PR マージ済 |
+| `/qa-regression` | スプリント内全 PR マージ済 |
+| `/ops-deploy` | `/qa-regression` サインオフ済 |
 
 ---
 

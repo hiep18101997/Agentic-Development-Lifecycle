@@ -1,7 +1,7 @@
 # Ask First Gates — 機微な変更リスト
 
 以下の変更は **シニア / テックリードに確認するまで停止が必須** です。
-このファイルが唯一の真実源 — `/dev:implement`、`/dev:pr`、`/dev:debug`、`/sec:review` から参照されます。
+このファイルが唯一の真実源 — `/dev-implement`、`/dev-pr`、`/dev-debug`、`/sec-review` から参照されます。
 
 ---
 

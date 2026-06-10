@@ -1,7 +1,7 @@
 # JP ↔ VN ↔ EN Glossary
 
 Bộ từ vựng chuẩn cho dự án outsource VN → JP.  
-Cập nhật tại đây, reference từ `/be:bridge` và các skill có output JP.
+Cập nhật tại đây, reference từ `/be-bridge` và các skill có output JP.
 
 ---
 

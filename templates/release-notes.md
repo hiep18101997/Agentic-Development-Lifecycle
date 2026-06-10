@@ -86,11 +86,11 @@ lang: vi
 
 ## Merged PRs / Closed Issues
 
-<!-- Danh sach PR/issue da merge/close trong release nay — tao tu dong boi /pm:release -->
+<!-- Danh sach PR/issue da merge/close trong release nay — tao tu dong boi /pm-release -->
 
 | PR/Issue | Title | Type |
 |----------|-------|------|
 | #[N] | [...] | Feature / Bug / Refactor |
 
 ---
-<!-- Template version: 1.0 | Tao boi /pm:release | Format: Keep a Changelog (keepachangelog.com) -->
+<!-- Template version: 1.0 | Tao boi /pm-release | Format: Keep a Changelog (keepachangelog.com) -->

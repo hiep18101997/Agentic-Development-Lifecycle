@@ -72,4 +72,4 @@
 - [ ] `docs/screens/[feature]/screen.md` — [変更内容を記述]
 - [ ] `docs/api/[domain]/[endpoint].md` — [変更内容を記述]
 
-<!-- マージ後に /docs:update を実行してベースラインドキュメントを同期する -->
+<!-- マージ後に /docs-update を実行してベースラインドキュメントを同期する -->

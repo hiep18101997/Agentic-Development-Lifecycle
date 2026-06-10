@@ -95,4 +95,4 @@ lang: vi
 
 ---
 <!-- Blameless culture — tap trung vao he thong va quy trinh, khong chi trich ca nhan. -->
-<!-- Tao boi /ops:incident | Template version: 1.0 -->
+<!-- Tao boi /ops-incident | Template version: 1.0 -->

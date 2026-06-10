@@ -14,7 +14,7 @@ _追記専用ログ: ユーザー入力（原文）+ エージェントの意思
 
 ---
 
-## [YYYY-MM-DD HH:mm JST] · skill=`/ba:spec` · round=1 · commit=`[short-sha]`
+## [YYYY-MM-DD HH:mm JST] · skill=`/ba-spec` · round=1 · commit=`[short-sha]`
 
 **ユーザー入力** (原文):
 > [ユーザーが入力した正確なテキスト]
@@ -25,7 +25,7 @@ _追記専用ログ: ユーザー入力（原文）+ エージェントの意思
 
 ---
 
-## [YYYY-MM-DD HH:mm JST] · skill=`/dev:analyze` · agent=planner · commit=`[short-sha]`
+## [YYYY-MM-DD HH:mm JST] · skill=`/dev-analyze` · agent=planner · commit=`[short-sha]`
 
 **ユーザー入力** (原文):
 > [...]

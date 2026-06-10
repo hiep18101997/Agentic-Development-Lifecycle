@@ -85,4 +85,4 @@ lang: en
 | [YYYY-MM-DD] | [Name] | BE / PM / Client | Approved / Rejected / Pending | [...] |
 
 ---
-<!-- Template version: 1.0 | Use /be:changerequest to generate CRs automatically -->
+<!-- Template version: 1.0 | Use /be-changerequest to generate CRs automatically -->

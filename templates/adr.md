@@ -82,7 +82,7 @@ lang: vi
 
 Ví dụ:
 - "Sau khi implement, chạy load test xác nhận p95 < 200ms tại 500 RPS"
-- "Peer review checklist item #5 trong /dev:review phải pass"
+- "Peer review checklist item #5 trong /dev-review phải pass"
 - "CI pipeline bắt buộc phải có bước kiểm tra [X] trước khi merge"
 ]
 

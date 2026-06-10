@@ -11,7 +11,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ### Added
 
-- **`--lite` install flag** — `npx agentic-development-lifecycle --yes --lite` installs the 8-skill Developer Lite subset (`/dev:analyze` `/dev:implement` `/dev:review` `/dev:pr` `/dev:debug` `/sec:review` `/arch:adr` `/docs:update`) plus 4 supporting agents, using a slim `bin/CLAUDE.lite.md`. Combines with `--lang ja|en|vi`. Claude Code only — rejects combinations with `--opencode/--cursor/--antigravity`.
+- **`--lite` install flag** — `npx agentic-development-lifecycle --yes --lite` installs the 8-skill Developer Lite subset (`/dev-analyze` `/dev-implement` `/dev-review` `/dev-pr` `/dev-debug` `/sec-review` `/arch-adr` `/docs-update`) plus 4 supporting agents, using a slim `bin/CLAUDE.lite.md`. Combines with `--lang ja|en|vi`. Claude Code only — rejects combinations with `--opencode/--cursor/--antigravity`.
 
 ### Removed
 

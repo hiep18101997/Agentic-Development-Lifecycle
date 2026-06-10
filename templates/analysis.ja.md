@@ -64,4 +64,4 @@ lang: ja
 <!-- 副作用、マイグレーションリスク、ロールバック手順、フィーチャーフラグの推奨事項 -->
 
 ---
-<!-- /dev:analyze により作成。analysis-compare.html でソート/フィルタリング可能。 -->
+<!-- /dev-analyze により作成。analysis-compare.html でソート/フィルタリング可能。 -->

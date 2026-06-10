@@ -1,6 +1,6 @@
 # Risk Classifier
 
-Cổng phân loại risk tập trung. Chạy trước khi bắt đầu bất kỳ task nào trong `/dev:analyze` và `/dev:implement`.
+Cổng phân loại risk tập trung. Chạy trước khi bắt đầu bất kỳ task nào trong `/dev-analyze` và `/dev-implement`.
 
 ---
 
@@ -55,7 +55,7 @@ Xác định loại input trước khi classify risk:
 
 **Quy trình**:
 - Tạo `docs/tasks/[TASK-ID]/analysis.md`
-- Chạy đủ `/dev:analyze` → `/dev:implement` → `/dev:pr`
+- Chạy đủ `/dev-analyze` → `/dev-implement` → `/dev-pr`
 - Verification: tạo `verification.md` với self-test steps
 
 **Ví dụ**: Thêm field mới vào form, thêm API endpoint mới, refactor một module.
@@ -66,8 +66,8 @@ Xác định loại input trước khi classify risk:
 **Quy trình**:
 - **Dừng ngay** — không implement trước khi có confirm từ senior/tech lead
 - Tạo analysis.md với risk section rõ ràng
-- Cần `/sec:review` trước khi tạo PR
-- Cần `/arch:review` nếu thay đổi design lớn
+- Cần `/sec-review` trước khi tạo PR
+- Cần `/arch-review` nếu thay đổi design lớn
 - Bridge Engineer review trước khi gửi khách (nếu deliverable JP)
 
 ---
@@ -98,4 +98,4 @@ Khi gặp Hard Trigger → hiện `⚠️ Ask First Gate` theo format trong `ass
 **Lý do**: [1 câu giải thích]
 ```
 
-Dán block này vào đầu mỗi analysis.md và vào gate đầu tiên của `/dev:implement`.
+Dán block này vào đầu mỗi analysis.md và vào gate đầu tiên của `/dev-implement`.
