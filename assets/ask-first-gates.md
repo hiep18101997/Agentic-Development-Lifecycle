@@ -1,7 +1,7 @@
 # Ask First Gates — Danh sách thay đổi nhạy cảm
 
 Những thay đổi sau **bắt buộc phải dừng lại và hỏi senior/tech lead** trước khi thực hiện.  
-File này là nguồn sự thật duy nhất — tham chiếu từ `/dev:implement`, `/dev:pr`, `/dev:debug`, `/sec:review`.
+File này là nguồn sự thật duy nhất — tham chiếu từ `/dev-implement`, `/dev-pr`, `/dev-debug`, `/sec-review`.
 
 ---
 

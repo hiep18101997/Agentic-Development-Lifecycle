@@ -2,11 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOTS = [
-  { dir: '.claude/commands', label: 'Claude Code' },
-  { dir: '.opencode/skills', label: 'OpenCode' },
-];
-
 const errors = [];
 
 function walk(dir) {
@@ -33,29 +28,48 @@ function parseFrontmatter(content) {
   return fields;
 }
 
-function expectedName(rootDir, filePath) {
+function checkFrontmatter(label, file, expectedName) {
+  const fm = parseFrontmatter(fs.readFileSync(file, 'utf8'));
+  if (!fm) { errors.push(`[${label}] missing frontmatter: ${file}`); return; }
+  if (!fm.name) errors.push(`[${label}] missing 'name:' field: ${file}`);
+  if (!fm.description) errors.push(`[${label}] missing 'description:' field: ${file}`);
+  if (fm.name && expectedName && fm.name !== expectedName) {
+    errors.push(`[${label}] name mismatch: ${file} declares '${fm.name}' but expected '${expectedName}'`);
+  }
+}
+
+// Claude Code Agent Skills: flat folders `.claude/skills/<skill>/SKILL[.lang].md`.
+// Each skill folder must hold SKILL.md + SKILL.en.md + SKILL.ja.md; `name:` == folder name.
+function validateClaudeSkills(dir, label) {
+  if (!fs.existsSync(dir)) { errors.push(`[${label}] directory not found: ${dir}`); return; }
+  const folders = fs.readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory());
+  if (folders.length === 0) { errors.push(`[${label}] no skill folders found in ${dir}`); return; }
+  let fileCount = 0;
+  for (const f of folders) {
+    const skillDir = path.join(dir, f.name);
+    for (const [variant, fname] of [['VN base', 'SKILL.md'], ['EN variant', 'SKILL.en.md'], ['JA variant', 'SKILL.ja.md']]) {
+      const fp = path.join(skillDir, fname);
+      if (!fs.existsSync(fp)) { errors.push(`[${label}] missing ${variant}: ${fp}`); continue; }
+      fileCount++;
+      checkFrontmatter(label, fp, f.name);
+    }
+  }
+  console.log(`[${label}] ${fileCount} files, ${folders.length} skills validated`);
+}
+
+// OpenCode skills: nested `.opencode/skills/<role>/<name>[.lang].md`, `name:` == "role:command".
+function expectedOpencodeName(rootDir, filePath) {
   const rel = path.relative(rootDir, filePath).replace(/\\/g, '/');
   const stem = rel.replace(/\.(en|ja)\.md$/, '').replace(/\.md$/, '');
   if (!stem.includes('/')) return stem;
   const [parent, leaf] = stem.split('/');
-  if (parent === leaf) return leaf;
-  return `${parent}:${leaf}`;
+  return parent === leaf ? leaf : `${parent}:${leaf}`;
 }
 
-function baseStem(filePath) {
-  return filePath.replace(/\.(en|ja)\.md$/, '.md');
-}
-
-for (const { dir, label } of ROOTS) {
+function validateOpencode(dir, label) {
   const files = walk(dir);
-  if (files.length === 0) {
-    errors.push(`[${label}] no .md files found in ${dir}`);
-    continue;
-  }
-
-  const stems = new Set();
-  for (const file of files) stems.add(baseStem(file));
-
+  if (files.length === 0) { errors.push(`[${label}] no .md files found in ${dir}`); return; }
+  const stems = new Set(files.map((f) => f.replace(/\.(en|ja)\.md$/, '.md')));
   for (const stem of stems) {
     const enFile = stem.replace(/\.md$/, '.en.md');
     const jaFile = stem.replace(/\.md$/, '.ja.md');
@@ -63,25 +77,12 @@ for (const { dir, label } of ROOTS) {
     if (!fs.existsSync(enFile)) errors.push(`[${label}] missing EN variant: ${enFile}`);
     if (!fs.existsSync(jaFile)) errors.push(`[${label}] missing JA variant: ${jaFile}`);
   }
-
-  for (const file of files) {
-    const content = fs.readFileSync(file, 'utf8');
-    const fm = parseFrontmatter(content);
-    if (!fm) {
-      errors.push(`[${label}] missing frontmatter: ${file}`);
-      continue;
-    }
-    if (!fm.name) errors.push(`[${label}] missing 'name:' field: ${file}`);
-    if (!fm.description) errors.push(`[${label}] missing 'description:' field: ${file}`);
-
-    const expected = expectedName(dir, file);
-    if (fm.name && fm.name !== expected) {
-      errors.push(`[${label}] name mismatch: ${file} declares '${fm.name}' but path implies '${expected}'`);
-    }
-  }
-
+  for (const file of files) checkFrontmatter(label, file, expectedOpencodeName(dir, file));
   console.log(`[${label}] ${files.length} files, ${stems.size} skills validated`);
 }
+
+validateClaudeSkills('.claude/skills', 'Claude Code');
+validateOpencode('.opencode/skills', 'OpenCode');
 
 if (errors.length) {
   console.error('\nVALIDATION FAILED:');

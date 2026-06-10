@@ -103,6 +103,6 @@ Nếu spec file không tìm thấy:
 {
   "error": "spec_not_found",
   "message": "docs/tasks/[TASK-ID]/requirements.md không tồn tại",
-  "needs": ["Correct TASK-ID", "Hoặc chạy /ba:spec trước"]
+  "needs": ["Correct TASK-ID", "Hoặc chạy /ba-spec trước"]
 }
 ```

@@ -132,10 +132,10 @@ copy_dir() {
     fi
 }
 
-# 1. .claude/commands
-echo "Copying skill commands..."
+# 1. .claude/skills (Agent Skills — copies each skill folder verbatim, incl. SKILL.en/ja.md)
+echo "Copying Claude Code skills..."
 mkdir -p "$TARGET_DIR/.claude"
-copy_dir "$SOURCE_DIR/.claude/commands" "$TARGET_DIR/.claude/commands" ".claude/commands/"
+copy_dir "$SOURCE_DIR/.claude/skills" "$TARGET_DIR/.claude/skills" ".claude/skills/"
 
 # 2. agents
 echo "Copying agent definitions..."

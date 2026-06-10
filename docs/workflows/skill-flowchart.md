@@ -15,60 +15,60 @@ flowchart TD
 
     %% ── Discovery ──
     subgraph DISC ["🔍 Discovery"]
-        BRIDGE["/be:bridge 🌐\nBridge Engineer"]
-        IDEATE["/pm:ideate\nPM · BA"]
-        REVERSE["/ba:reverse\nBA · Tech Lead"]
+        BRIDGE["/be-bridge 🌐\nBridge Engineer"]
+        IDEATE["/pm-ideate\nPM · BA"]
+        REVERSE["/ba-reverse\nBA · Tech Lead"]
         BASELINE[(docs/baseline/<br/>codebase-overview.md)]
     end
 
     %% ── Planning ──
     subgraph PLAN ["📋 Planning"]
-        SPEC["/ba:spec\nBA"]
-        STORY["/ba:user-story\nBA"]
-        BREAKDOWN["/pm:breakdown\nPM"]
+        SPEC["/ba-spec\nBA"]
+        STORY["/ba-user-story\nBA"]
+        BREAKDOWN["/pm-breakdown\nPM"]
         ISSUES[(GitHub Issues)]
     end
 
     %% ── Architecture ──
     subgraph ARCH ["🏛️ Architecture (xuyên suốt)"]
-        ARCH_REV["/arch:review\nTech Lead"]
-        ADR["/arch:adr\nTech Lead"]
+        ARCH_REV["/arch-review\nTech Lead"]
+        ADR["/arch-adr\nTech Lead"]
     end
 
     %% ── Dev per Issue ──
     subgraph DEV ["💻 Dev Cycle — per issue"]
         RISK["🔵 Risk Classifier\ndocs/risk-classifier.md"]
-        ANALYZE["/dev:analyze 🌐\nDev"]
-        IMPLEMENT["/dev:implement\nDev"]
+        ANALYZE["/dev-analyze 🌐\nDev"]
+        IMPLEMENT["/dev-implement\nDev"]
         VERIFY["✅ Verification Gate\nUser reports test results"]
         HARNESS["📝 Harness Delta\ndocs/improvement-backlog.md"]
-        DEBUG["/dev:debug\nDev"]
-        DEVREVIEW["/dev:review\nDev · Tech Lead"]
-        PR["/dev:pr\nDev"]
+        DEBUG["/dev-debug\nDev"]
+        DEVREVIEW["/dev-review\nDev · Tech Lead"]
+        PR["/dev-pr\nDev"]
     end
 
     %% ── QA ──
     subgraph QA ["🧪 QA Cycle"]
-        TESTPLAN["/qa:testplan 🌐\nQA"]
-        BUGR["/qa:bug\nQA"]
-        REGRESSION["/qa:regression 🌐\nQA"]
+        TESTPLAN["/qa-testplan 🌐\nQA"]
+        BUGR["/qa-bug\nQA"]
+        REGRESSION["/qa-regression 🌐\nQA"]
     end
 
     %% ── Sprint Ops ──
     subgraph SPRINT ["📊 Sprint Ops (lặp lại)"]
-        STANDUP["/sm:standup\ndaily"]
-        STATUS["/pm:status 🌐\nper sprint"]
-        RETRO["/sm:retro\nsprint end"]
+        STANDUP["/sm-standup\ndaily"]
+        STATUS["/pm-status 🌐\nper sprint"]
+        RETRO["/sm-retro\nsprint end"]
     end
 
     %% ── Release ──
     subgraph REL ["🚀 Release"]
-        DEPLOY["/ops:deploy\nDevOps"]
-        INCIDENT["/ops:incident\nDevOps"]
+        DEPLOY["/ops-deploy\nDevOps"]
+        INCIDENT["/ops-incident\nDevOps"]
     end
 
     %% ── Post-merge ──
-    DOCS["/docs:update\nDev · QA"]
+    DOCS["/docs-update\nDev · QA"]
 
     %% ════════════════════════════
     %% FLOWS
@@ -145,54 +145,54 @@ flowchart TD
 
 ### Bridge Engineer — JP Outsource Entry
 ```
-JP Client → /be:bridge → /ba:spec (VN) + 設計書 (JP)
+JP Client → /be-bridge → /ba-spec (VN) + 設計書 (JP)
 ```
 
 ### Brownfield Onboarding — Take-over codebase legacy
 ```
-Legacy codebase → /ba:reverse → docs/baseline/codebase-overview.md
-                              → [optional /be:bridge review JP]
-                              → /ba:spec (cho feature mới có context)
+Legacy codebase → /ba-reverse → docs/baseline/codebase-overview.md
+                              → [optional /be-bridge review JP]
+                              → /ba-spec (cho feature mới có context)
 ```
 
 ### PM / BA — Discovery → Planning
 ```
-/pm:ideate → /ba:spec → /ba:user-story → /pm:breakdown → Issues
+/pm-ideate → /ba-spec → /ba-user-story → /pm-breakdown → Issues
 ```
 
 ### Dev — Per Issue
 ```
 Issue → Risk Classifier (tiny/normal/high-risk)
-    [normal] → /dev:analyze → [review analysis.md]
-                    → /dev:implement → [report test results → verification.md]
+    [normal] → /dev-analyze → [review analysis.md]
+                    → /dev-implement → [report test results → verification.md]
                     → [harness delta check]
-                    → /dev:review → /dev:pr → /docs:update
+                    → /dev-review → /dev-pr → /docs-update
                          ↕ (bug)
-                     /dev:debug
+                     /dev-debug
     [tiny]  → patch direct
-    [high-risk] → senior confirm → /dev:analyze → ...
+    [high-risk] → senior confirm → /dev-analyze → ...
 ```
 
 ### QA — Parallel với Dev
 ```
-/ba:spec ──→ /qa:testplan ──→ testing
+/ba-spec ──→ /qa-testplan ──→ testing
                                  ↓ (bug found)
-                             /qa:bug → /dev:debug → retest
+                             /qa-bug → /dev-debug → retest
                                  ↓ (pre-release)
-                            /qa:regression → /ops:deploy
+                            /qa-regression → /ops-deploy
 ```
 
 ### Architecture — Xuyên suốt sprint
 ```
-/arch:review ←──→ /arch:adr
+/arch-review ←──→ /arch-adr
      ↑                 ↑
 Planning          Dev decisions
 ```
 
 ### Sprint Ops — Scrum rituals
 ```
-/sm:standup (daily) ──→ /sm:retro (sprint end)
-                    ──→ /pm:status (on-demand)
+/sm-standup (daily) ──→ /sm-retro (sprint end)
+                    ──→ /pm-status (on-demand)
 ```
 
 ---
@@ -201,15 +201,15 @@ Planning          Dev decisions
 
 | Skill | Yêu cầu trước khi chạy |
 |-------|------------------------|
-| `/ba:user-story` | `/ba:spec` đã done |
-| `/pm:breakdown` | `/ba:user-story` hoặc User Stories đã có |
-| `/dev:analyze` | Risk Classifier đã chạy (xem `docs/risk-classifier.md`) + Issue/task rõ ràng (AC defined) |
-| `/dev:implement` | `docs/tasks/[ID]/analysis.md` đã tồn tại |
-| `/dev:review` | `/dev:implement` Bước 5 done + `verification.md` saved + Harness Delta check done |
-| `/dev:pr` | `/dev:review` Approve + không có blocking issues |
-| `/docs:update` | PR đã merge |
-| `/qa:regression` | Tất cả PR của sprint đã merge |
-| `/ops:deploy` | `/qa:regression` đã sign-off |
+| `/ba-user-story` | `/ba-spec` đã done |
+| `/pm-breakdown` | `/ba-user-story` hoặc User Stories đã có |
+| `/dev-analyze` | Risk Classifier đã chạy (xem `docs/risk-classifier.md`) + Issue/task rõ ràng (AC defined) |
+| `/dev-implement` | `docs/tasks/[ID]/analysis.md` đã tồn tại |
+| `/dev-review` | `/dev-implement` Bước 5 done + `verification.md` saved + Harness Delta check done |
+| `/dev-pr` | `/dev-review` Approve + không có blocking issues |
+| `/docs-update` | PR đã merge |
+| `/qa-regression` | Tất cả PR của sprint đã merge |
+| `/ops-deploy` | `/qa-regression` đã sign-off |
 
 ---
 

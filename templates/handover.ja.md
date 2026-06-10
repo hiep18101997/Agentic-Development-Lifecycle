@@ -106,4 +106,4 @@ lang: ja
 | スプリント履歴 | [リンク] | [...] |
 
 ---
-<!-- Template version: 1.0 | /pm:handover スキルで生成 -->
+<!-- Template version: 1.0 | /pm-handover スキルで生成 -->

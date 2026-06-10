@@ -96,4 +96,4 @@ lang: ja
 
 ---
 <!-- 再発防止を目的とした振り返りです。個人を責めるものではありません。 -->
-<!-- /ops:incident スキルで生成 | Template version: 1.0 -->
+<!-- /ops-incident スキルで生成 | Template version: 1.0 -->

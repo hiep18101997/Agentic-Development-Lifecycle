@@ -47,7 +47,7 @@ jobs:
           cd "$INSTALL_DIR"
           case "${{ matrix.platform }}" in
             claude)
-              count=$(find .claude/commands -name "*.md" | wc -l)
+              count=$(find .claude/skills -name "SKILL.md" | wc -l)
               test -f CLAUDE.md || { echo "FAIL: CLAUDE.md missing"; exit 1; }
               test -d agents   || { echo "FAIL: agents/ missing"; exit 1; }
               ;;

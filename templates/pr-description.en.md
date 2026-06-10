@@ -77,4 +77,4 @@ lang: en
 - [ ] `docs/screens/[feature]/screen.md` — [describe change]
 - [ ] `docs/api/[domain]/[endpoint].md` — [describe change]
 
-<!-- Run /docs:update after merge to sync baseline docs -->
+<!-- Run /docs-update after merge to sync baseline docs -->

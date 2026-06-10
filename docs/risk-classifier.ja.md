@@ -1,6 +1,6 @@
 # リスク分類器（Risk Classifier）
 
-集中型のリスク分類ゲート。`/dev:analyze` と `/dev:implement` の冒頭で、すべてのタスク開始前に実行する。
+集中型のリスク分類ゲート。`/dev-analyze` と `/dev-implement` の冒頭で、すべてのタスク開始前に実行する。
 
 ---
 
@@ -55,7 +55,7 @@
 
 **手順**:
 - `docs/tasks/[TASK-ID]/analysis.md` を作成
-- フルワークフロー実施: `/dev:analyze` → `/dev:implement` → `/dev:pr`
+- フルワークフロー実施: `/dev-analyze` → `/dev-implement` → `/dev-pr`
 - 検証: セルフテスト手順付き `verification.md` 作成
 
 **例**: フォームへの新フィールド追加、新 API エンドポイント追加、モジュールリファクタリング。
@@ -66,8 +66,8 @@
 **手順**:
 - **即停止** — シニア / テックリードの確認を得るまで実装しない
 - 明確なリスクセクション付き `analysis.md` を作成
-- PR 作成前に `/sec:review` 必須
-- 大規模な設計変更を含む場合は `/arch:review` 必須
+- PR 作成前に `/sec-review` 必須
+- 大規模な設計変更を含む場合は `/arch-review` 必須
 - JP 成果物の場合、顧客送付前にブリッジエンジニアレビュー
 
 ---
@@ -98,4 +98,4 @@ Hard Trigger 検出時 → `assets/ask-first-gates.md`（または `.ja.md`）�
 **理由**: [1 文での説明]
 ```
 
-このブロックを各 `analysis.md` の冒頭、および `/dev:implement` の最初のゲートに貼り付ける。
+このブロックを各 `analysis.md` の冒頭、および `/dev-implement` の最初のゲートに貼り付ける。

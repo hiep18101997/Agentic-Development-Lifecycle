@@ -36,7 +36,7 @@ Khi output có ý định để "tiếp tục làm việc" — review code diff,
 Theo các snippet và discussion trên HN/Linux.do, bộ demo gồm những pattern điển hình:
 
 1. **Code review dashboard** — diff với syntax highlight, comment inline, checklist.
-2. **Comparison table tương tác** — sort/filter các option khi `/dev:analyze` ra 2–3 phương án.
+2. **Comparison table tương tác** — sort/filter các option khi `/dev-analyze` ra 2–3 phương án.
 3. **Data exploration** — bảng JSON/CSV với search box thay vì dump Markdown table.
 4. **API explorer** — form gọi thử endpoint từ chính file HTML output.
 5. **Test report** — pass/fail cards, click expand stack trace.
@@ -73,13 +73,13 @@ Bài viết có vài hệ luỵ trực tiếp với framework này:
 
 | Skill | Output hiện tại | Gợi ý sau bài viết |
 |-------|----------------|---------------------|
-| `/dev:analyze` | `analysis.md` (Markdown) | Cân nhắc thêm `analysis.html` so sánh 2–3 option dạng tương tác (giữ `.md` để commit) |
-| `/qa:testplan` | Markdown table | HTML có checkbox + filter status — QA tick trực tiếp khi chạy |
-| `/pm:status` | Markdown | HTML dashboard cho stakeholder JP — đẹp hơn khi forward email |
-| `/be:bridge` | Markdown song ngữ | HTML 2 cột JP/VN có copy button — phù hợp deliverable JP (設計書) |
-| `/ba:reverse` | `codebase-overview.md` | HTML codebase map clickable — onboard nhanh hơn |
-| `/dev:pr` | Markdown PR body | Giữ Markdown (GitHub render) |
-| `/docs:update` (baseline) | Markdown | Giữ Markdown (commit vào repo) |
+| `/dev-analyze` | `analysis.md` (Markdown) | Cân nhắc thêm `analysis.html` so sánh 2–3 option dạng tương tác (giữ `.md` để commit) |
+| `/qa-testplan` | Markdown table | HTML có checkbox + filter status — QA tick trực tiếp khi chạy |
+| `/pm-status` | Markdown | HTML dashboard cho stakeholder JP — đẹp hơn khi forward email |
+| `/be-bridge` | Markdown song ngữ | HTML 2 cột JP/VN có copy button — phù hợp deliverable JP (設計書) |
+| `/ba-reverse` | `codebase-overview.md` | HTML codebase map clickable — onboard nhanh hơn |
+| `/dev-pr` | Markdown PR body | Giữ Markdown (GitHub render) |
+| `/docs-update` (baseline) | Markdown | Giữ Markdown (commit vào repo) |
 
 **Nguyên tắc đề xuất**: với output **dùng một lần để review/quyết định** → HTML; với output **lưu lâu dài trong repo** → Markdown.
 

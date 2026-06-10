@@ -3,7 +3,7 @@ name: pr-resolver
 model: sonnet
 description: >
   Đọc danh sách PR review comments và đề xuất fix cụ thể cho từng comment.
-  Spawned bởi /dev:pr khi user chọn "Resolve PR comments".
+  Spawned bởi /dev-pr khi user chọn "Resolve PR comments".
 ---
 
 # Agent: pr-resolver

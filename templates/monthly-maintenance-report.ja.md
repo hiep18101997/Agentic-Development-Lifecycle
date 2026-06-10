@@ -63,4 +63,4 @@ lang: ja
 **リスク・留意事項**: [翌月に想定されるリスクおよび対応方針]
 
 ---
-<!-- Template version: 1.0 | /pm:maintain スキルで生成 -->
+<!-- Template version: 1.0 | /pm-maintain スキルで生成 -->

@@ -67,4 +67,4 @@ lang: vi
 **Ghi chú sign-off**: [Điều kiện hoặc exceptions được chấp nhận, nếu có]
 
 ---
-<!-- Tạo bởi /dev:implement. Sau khi pass, chạy /dev:pr để tạo PR. -->
+<!-- Tạo bởi /dev-implement. Sau khi pass, chạy /dev-pr để tạo PR. -->

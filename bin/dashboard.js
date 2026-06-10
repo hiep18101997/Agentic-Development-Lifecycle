@@ -126,16 +126,17 @@ function getGitActivity(root) {
 
 // ── Skill catalog ───────────────────────────────────────────
 
-function scanSkillCatalog(commandsDir) {
-  if (!fs.existsSync(commandsDir)) return [];
+// Scan Claude Code Agent Skills: flat folders `.claude/skills/<role-command>/SKILL.md`.
+// Skill name = folder name (e.g. "ba-spec"); role = prefix before the first hyphen.
+function scanSkillCatalog(skillsDir) {
+  if (!fs.existsSync(skillsDir)) return [];
   const skills = [];
-  for (const entry of fs.readdirSync(commandsDir, { withFileTypes: true })) {
+  for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    const role    = entry.name;
-    const roleDir = path.join(commandsDir, role);
-    for (const f of fs.readdirSync(roleDir)) {
-      if (f.endsWith('.md')) skills.push({ role, name: `${role}:${f.replace('.md', '')}`, usageCount: 0 });
-    }
+    if (!fs.existsSync(path.join(skillsDir, entry.name, 'SKILL.md'))) continue;
+    const name = entry.name;
+    const role = name.split('-')[0];
+    skills.push({ role, name, usageCount: 0 });
   }
   return skills;
 }
@@ -164,7 +165,7 @@ function build() {
   const backlog    = parseBacklog(path.join(ROOT, 'docs', 'improvement-backlog.md'));
   const validation = parseValidation(path.join(ROOT, 'docs', 'validation-matrix.md'));
   const gitAct     = getGitActivity(ROOT);
-  const skills     = crossRefUsage(scanSkillCatalog(path.join(ROOT, '.claude', 'commands')), auditEntries);
+  const skills     = crossRefUsage(scanSkillCatalog(path.join(ROOT, '.claude', 'skills')), auditEntries);
   const growth     = {
     decisions: countDir(path.join(ROOT, 'docs', 'decisions')),
     screens:   countDir(path.join(ROOT, 'docs', 'screens')),

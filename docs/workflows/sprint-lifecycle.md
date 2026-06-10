@@ -3,7 +3,7 @@
 **Framework**: Agentic Development Lifecycle  
 **Last updated**: 2026-05-15
 
-> 📊 Xem quick dashboard: chạy `/pm:dashboard` → tạo `sprint-status.html` (kanban + health table + backlog)
+> 📊 Xem quick dashboard: chạy `/pm-dashboard` → tạo `sprint-status.html` (kanban + health table + backlog)
 
 ---
 
@@ -11,37 +11,37 @@
 
 ```
 Giai đoạn 1: Khởi đầu Sprint
-  PM: /pm:ideate (optional) → /ba:spec → /ba:user-story → /pm:breakdown
+  PM: /pm-ideate (optional) → /ba-spec → /ba-user-story → /pm-breakdown
   
   [GitHub Issues được tạo, được assign cho dev]
 
 Giai đoạn 2: Dev Implementation  
-  Dev: /dev:analyze → /dev:implement → /dev:review → /dev:pr
+  Dev: /dev-analyze → /dev-implement → /dev-review → /dev-pr
 
 Giai đoạn 3: Review & Merge
   Reviewer: Code review (manual + /ultrareview optional)
-  QA: /qa:testplan (nếu cần) → Test execution
+  QA: /qa-testplan (nếu cần) → Test execution
 
 Giai đoạn 4: Release
-  DevOps: /ops:deploy → Deploy → Monitor
+  DevOps: /ops-deploy → Deploy → Monitor
   
-  [Nếu incident: /ops:incident]
+  [Nếu incident: /ops-incident]
 
 Giai đoạn 5: Retrospective
-  SM: /sm:retro
+  SM: /sm-retro
 ```
 
 ---
 
 ## Giai đoạn 1: Khởi đầu Sprint
 
-### 1.1 Ideation (Optional) `/pm:ideate`
+### 1.1 Ideation (Optional) `/pm-ideate`
 **Người dùng**: PM / BA / Product Owner  
-**Khi dùng**: Ý tưởng còn mơ hồ, chưa rõ scope. Chạy trước `/ba:spec` để tránh spec sai hướng.  
+**Khi dùng**: Ý tưởng còn mơ hồ, chưa rõ scope. Chạy trước `/ba-spec` để tránh spec sai hướng.  
 **Input**: Ý tưởng thô  
 **Output**: Concept doc với problem statement, goals, NOT Doing list
 
-### 1.2 Business Spec `/ba:spec`
+### 1.2 Business Spec `/ba-spec`
 **Người dùng**: BA  
 **Input**: Raw requirement (JP translated bởi BE, hoặc VN trực tiếp)  
 **Output**: `docs/tasks/[TASK-ID]/requirements.md`  
@@ -50,12 +50,12 @@ Giai đoạn 5: Retrospective
 2. Confirm AC list  
 3. Q&A History append-only (resume sau interrupt)
 
-### 1.3 User Stories `/ba:user-story`
+### 1.3 User Stories `/ba-user-story`
 **Người dùng**: BA / PM  
 **Input**: `requirements.md`  
 **Output**: User Stories format: "As a [user], I want [action], so that [benefit]" + AC
 
-### 1.4 Task Breakdown `/pm:breakdown`
+### 1.4 Task Breakdown `/pm-breakdown`
 **Người dùng**: PM / Tech Lead  
 **Input**: Epic hoặc User Stories  
 **Output**: GitHub Issues (hoặc GitLab) với estimate, label, assignee  
@@ -71,7 +71,7 @@ Trước khi bắt đầu bất kỳ task nào, classify risk theo `docs/risk-cl
 - **Normal** → chạy đủ analyze → implement → review → PR
 - **High-risk** → dừng, hỏi senior trước khi tiếp tục
 
-### 2.2 Task Analysis `/dev:analyze`
+### 2.2 Task Analysis `/dev-analyze`
 **Người dùng**: Dev  
 **Input**: GitHub Issue + codebase  
 **Output**: `docs/tasks/[TASK-ID]/analysis.md` với 2-3 phương án + trade-off  
@@ -81,9 +81,9 @@ Trước khi bắt đầu bất kỳ task nào, classify risk theo `docs/risk-cl
 
 **Multi-agent pattern**: `task-reader` (haiku) → `code-scout` (haiku) → `planner` (sonnet) → orchestrator tổng hợp
 
-**Hard stop** — `dev:analyze` dừng sau khi ghi `analysis.md`. User tự trigger `/dev:implement` sau khi review.
+**Hard stop** — `dev:analyze` dừng sau khi ghi `analysis.md`. User tự trigger `/dev-implement` sau khi review.
 
-### 2.3 Implementation `/dev:implement`
+### 2.3 Implementation `/dev-implement`
 **Người dùng**: Dev  
 **Input**: `analysis.md` (phương án đã chọn)  
 **Output**: Code changes + `docs/tasks/[TASK-ID]/verification.md`  
@@ -94,36 +94,36 @@ Trước khi bắt đầu bất kỳ task nào, classify risk theo `docs/risk-cl
 4. Bước 5 — Verification Gate: diff review → AI generates self-test steps → user reports results → saves `verification.md`
 5. **Harness Delta Check** — agent tự hỏi có friction nào không, ghi vào `docs/improvement-backlog.md` nếu có
 
-**Hard stop sau Bước 5** — user phải tự trigger `/dev:review`.
+**Hard stop sau Bước 5** — user phải tự trigger `/dev-review`.
 
-### 2.4 Dev Review `/dev:review`
+### 2.4 Dev Review `/dev-review`
 **Người dùng**: Dev / Tech Lead  
 **Input**: Code diff + `analysis.md` + `verification.md`  
 **Output**: Review report gồm 4 lens: code quality, architecture, performance, security  
 **Gates**:
 1. Confirm focus (All / Code / Arch / Security)
 2. Verdict: Approve / Approve with minor fixes / Request Changes
-3. Nếu có design decision mới → hỏi có tạo `/arch:adr` không
+3. Nếu có design decision mới → hỏi có tạo `/arch-adr` không
 
 Review 4 lens trong 1 lần chạy:
 - **Code Quality** — logic, naming, test coverage, performance, error handling
 - **Architecture** — scalability, coupling, maintainability, design decision mới
 - **Security** — OWASP Top 10, auth/authz (Ask First gate), dependency CVEs
 
-**Blocking issues** → dev fix và chạy lại `/dev:review`  
-**Approve** → tiếp tục `/dev:pr`
+**Blocking issues** → dev fix và chạy lại `/dev-review`  
+**Approve** → tiếp tục `/dev-pr`
 
 ---
 
 ## Giai đoạn 3: Review & Merge
 
-### 3.1 Dev PR `/dev:pr`
+### 3.1 Dev PR `/dev-pr`
 **Người dùng**: Dev  
 **Input**: Code diff + `analysis.md` + `verification.md` (nếu có)  
 **Output**: PR description (Testing section tự động populate từ `verification.md`)  
-**Prerequisite**: `/dev:review` đã chạy và verdict = Approve (hoặc Approve with minor fixes).  
+**Prerequisite**: `/dev-review` đã chạy và verdict = Approve (hoặc Approve with minor fixes).  
 **Gate**:
-1. Kiểm tra `/dev:review` đã Approve chưa — nếu chưa, dừng và hướng dẫn chạy review trước
+1. Kiểm tra `/dev-review` đã Approve chưa — nếu chưa, dừng và hướng dẫn chạy review trước
 2. Confirm AC coverage
 3. Confirm reviewer list
 
@@ -133,19 +133,19 @@ Review 4 lens trong 1 lần chạy:
 - Address comments
 
 ### 3.3 QA (nếu cần)
-- `/qa:testplan` — tạo test plan từ spec (thường làm trước implement)
-- `/qa:regression` — regression checklist trước release lớn
+- `/qa-testplan` — tạo test plan từ spec (thường làm trước implement)
+- `/qa-regression` — regression checklist trước release lớn
 
 ---
 
 ## Giai đoạn 4: Release
 
-### 4.1 Deployment `/ops:deploy`
+### 4.1 Deployment `/ops-deploy`
 **Người dùng**: DevOps / Dev  
 **Output**: Deployment checklist + CI quality gate + rollback plan  
 **Chú ý**: Timezone JST đối với khách Nhật
 
-### 4.2 Incident (nếu xảy ra) `/ops:incident`
+### 4.2 Incident (nếu xảy ra) `/ops-incident`
 **Trigger**: Hệ thống bị lỗi production  
 **Pattern**: Triage → điều tra song song 3 hướng → RCA template (5 Whys)
 
@@ -153,12 +153,12 @@ Review 4 lens trong 1 lần chạy:
 
 ## Giai đoạn 5: Docs Update
 
-### 5.1 Baseline Docs Update `/docs:update`
+### 5.1 Baseline Docs Update `/docs-update`
 **Trigger**: Sau khi task merge và verify  
 **Input**: `verification.md` + actual code  
 **Output**: Cập nhật `docs/screens/` hoặc `docs/api/` baseline, kèm metadata: `Last updated` (JST), `Updated by task`, `Commit` (short-sha)
 
-### 5.2 Project Docs `/docs:project`
+### 5.2 Project Docs `/docs-project`
 **Trigger**: Khi có thay đổi lớn (skill mới, team thay đổi, process update)  
 **Output**: README, CLAUDE.md, workflow guides được sync
 
@@ -166,11 +166,11 @@ Review 4 lens trong 1 lần chạy:
 
 ## Giai đoạn 6: Retrospective
 
-### 6.1 Sprint Retro `/sm:retro`
+### 6.1 Sprint Retro `/sm-retro`
 **Trigger**: Cuối sprint  
 **Output**: Went well / Didn't go well / Actions  
 
-### 6.2 Standup `/sm:standup`
+### 6.2 Standup `/sm-standup`
 **Trigger**: Hàng ngày  
 **Output**: Yesterday / Today / Blockers per member
 
@@ -181,8 +181,8 @@ Review 4 lens trong 1 lần chạy:
 Trước giai đoạn 1, khi bắt đầu dự án mới từ đầu:
 
 ```
-/pm:kickoff → Tech stack decision + ADRs → docs/ structure → Sprint 0 checklist
-    → Nếu JP client: /be:bridge tạo 基本設計書 → JP confirm
+/pm-kickoff → Tech stack decision + ADRs → docs/ structure → Sprint 0 checklist
+    → Nếu JP client: /be-bridge tạo 基本設計書 → JP confirm
     → Sprint 1: vào giai đoạn Discovery bình thường
 ```
 
@@ -193,7 +193,7 @@ Trước giai đoạn 1, khi bắt đầu dự án mới từ đầu:
 Khi spec thay đổi sau sign-off:
 
 ```
-JP yêu cầu thay đổi → /be:changerequest → Impact analysis + CR document
+JP yêu cầu thay đổi → /be-changerequest → Impact analysis + CR document
     → Approval (PM + khách JP) → Cập nhật requirements.md (ghi CR ref)
     → Tạo issue mới hoặc cập nhật issue gốc → Dev workflow bình thường
 ```
@@ -207,11 +207,11 @@ JP yêu cầu thay đổi → /be:changerequest → Impact analysis + CR documen
 Sau go-live, khi project vào sustain/support phase:
 
 ```
-Yêu cầu đến → /pm:maintain triage (P1/P2/P3/P4)
-    → P1: Hotfix ngay + /ops:incident
+Yêu cầu đến → /pm-maintain triage (P1/P2/P3/P4)
+    → P1: Hotfix ngay + /ops-incident
     → P2/P3: Dev fix (tiny hoặc normal lane)
     → P4: Batch vào monthly backlog
-    → Cuối tháng: /pm:maintain → 月次保守報告書 → gửi JP
+    → Cuối tháng: /pm-maintain → 月次保守報告書 → gửi JP
 ```
 
 ---
@@ -221,7 +221,7 @@ Yêu cầu đến → /pm:maintain triage (P1/P2/P3/P4)
 Khi kết thúc project hoặc team member rời:
 
 ```
-/pm:handover → 引き継ぎ書 VN + JP
+/pm-handover → 引き継ぎ書 VN + JP
     → Handover meeting + walk-through
     → Người tiếp nhận shadow 1-2 sprint
     → Update contact matrix trong CLAUDE.md
@@ -233,13 +233,13 @@ Khi kết thúc project hoặc team member rời:
 
 | Skill | Gate | Loại |
 |-------|------|-------|
-| `/dev:analyze` | Chọn phương án | Decision |
-| `/dev:implement` | Confirm từng file | Safety |
-| `/dev:implement` | Verification + Harness Delta | Quality |
-| `/dev:review` | Scope + Verdict | Quality |
-| `/dev:pr` | AC coverage + Reviewer | Process |
-| `/ops:deploy` | Pre-deploy checklist | Safety |
-| `/ba:spec` | Scope + AC confirm | Requirement |
+| `/dev-analyze` | Chọn phương án | Decision |
+| `/dev-implement` | Confirm từng file | Safety |
+| `/dev-implement` | Verification + Harness Delta | Quality |
+| `/dev-review` | Scope + Verdict | Quality |
+| `/dev-pr` | AC coverage + Reviewer | Process |
+| `/ops-deploy` | Pre-deploy checklist | Safety |
+| `/ba-spec` | Scope + AC confirm | Requirement |
 
 ---
 

@@ -85,4 +85,4 @@ lang: vi
 | [YYYY-MM-DD] | [Name] | BE / PM / Client | Approved / Rejected / Pending | [...] |
 
 ---
-<!-- Template version: 1.0 | Xem /be:changerequest de tao CR tu dong -->
+<!-- Template version: 1.0 | Xem /be-changerequest de tao CR tu dong -->

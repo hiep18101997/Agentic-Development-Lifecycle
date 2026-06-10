@@ -87,4 +87,4 @@ lang: ja
 | [YYYY-MM-DD] | [氏名] | BE / PM / 顧客 | 承認 / 却下 / 保留 | [...] |
 
 ---
-<!-- Template version: 1.0 | /be:changerequest スキルで自動生成可能 -->
+<!-- Template version: 1.0 | /be-changerequest スキルで自動生成可能 -->

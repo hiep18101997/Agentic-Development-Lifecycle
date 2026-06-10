@@ -57,21 +57,16 @@ const YES = process.argv.includes('--yes') || process.argv.includes('-y');
 const UPDATE = process.argv.includes('--update') || process.argv.includes('-u');
 const LITE = process.argv.includes('--lite');
 
-// Developer Lite: 8 skills only. Path is "<role>/<name>" (no extension, no lang suffix).
+// Developer Lite: 8 skills only. Names match the skill folder under .claude/skills/.
 const LITE_SKILLS = new Set([
-  'dev/analyze', 'dev/implement', 'dev/review', 'dev/pr', 'dev/debug',
-  'sec/review', 'arch/adr', 'docs/update',
+  'dev-analyze', 'dev-implement', 'dev-review', 'dev-pr', 'dev-debug',
+  'sec-review', 'arch-adr', 'docs-update',
 ]);
 
 // Agents spawned by the lite skill set.
 const LITE_AGENTS = new Set([
   'diff-reader.md', 'doc-updater.md', 'pr-resolver.md', 'review-reader.md',
 ]);
-
-function liteSkillPath(relPath) {
-  // "dev/analyze.ja.md" -> "dev/analyze"; "arch/adr.md" -> "arch/adr"
-  return relPath.replace(/\.(en|ja)\.(md|txt)$/, '').replace(/\.(md|txt)$/, '');
-}
 
 function parsePlatform() {
   const flags = process.argv;
@@ -100,7 +95,7 @@ function parseLang() {
 const LANG = parseLang();
 
 const PLATFORM_CONFIG = {
-  claude:      { label: 'Claude Code',  banner: BANNER_CC,     commandsDir: '.claude/commands',   configFile: 'CLAUDE.md' },
+  claude:      { label: 'Claude Code',  banner: BANNER_CC,     commandsDir: '.claude/skills',     configFile: 'CLAUDE.md' },
   opencode:    { label: 'OpenCode',     banner: BANNER_OC,     commandsDir: '.opencode/skills',   configFile: 'AGENTS.md' },
   cursor:      { label: 'Cursor',       banner: BANNER_CURSOR, commandsDir: '.cursor/rules',      configFile: '.cursorrules' },
   antigravity: { label: 'Antigravity',  banner: BANNER_AG,     commandsDir: '.antigravity/skills', configFile: 'AGENTS.md' },
@@ -190,6 +185,47 @@ function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRo
   return { copied, skipped, updated, filtered };
 }
 
+// Copy Claude Code Agent Skills from source `.claude/skills/<skill>/SKILL[.lang].md`.
+// Source bundles SKILL.md (VN) + SKILL.en.md + SKILL.ja.md in one folder. Per --lang:
+//   vi/en/ja  → write the chosen language as `<skill>/SKILL.md` (one folder per skill)
+//   all       → fan out to `<skill>/`, `<skill>-en/`, `<skill>-ja/` (each `SKILL.md`)
+// skillFilter (lite) matches the skill folder name (e.g. "dev-analyze").
+function copyClaudeSkills(srcSkillsDir, dstSkillsDir, skillFilter = null) {
+  if (!fs.existsSync(srcSkillsDir)) return { copied: 0, skipped: 0, updated: 0, filtered: 0 };
+  let copied = 0, skipped = 0, updated = 0, filtered = 0;
+  for (const skill of fs.readdirSync(srcSkillsDir, { withFileTypes: true })) {
+    if (!skill.isDirectory()) continue;
+    if (skillFilter && !skillFilter(skill.name)) { filtered++; continue; }
+    const skillDir = path.join(srcSkillsDir, skill.name);
+    const has = (n) => fs.existsSync(path.join(skillDir, n));
+    const targets = [];
+    if (LANG === 'vi') {
+      targets.push({ src: 'SKILL.md', folder: skill.name });
+    } else if (LANG === 'en') {
+      targets.push({ src: has('SKILL.en.md') ? 'SKILL.en.md' : 'SKILL.md', folder: skill.name });
+    } else if (LANG === 'ja') {
+      targets.push({ src: has('SKILL.ja.md') ? 'SKILL.ja.md' : 'SKILL.md', folder: skill.name });
+    } else { // all
+      targets.push({ src: 'SKILL.md', folder: skill.name });
+      if (has('SKILL.en.md')) targets.push({ src: 'SKILL.en.md', folder: `${skill.name}-en` });
+      if (has('SKILL.ja.md')) targets.push({ src: 'SKILL.ja.md', folder: `${skill.name}-ja` });
+    }
+    for (const t of targets) {
+      const s = path.join(skillDir, t.src);
+      if (!fs.existsSync(s)) continue;
+      const ddir = path.join(dstSkillsDir, t.folder);
+      fs.mkdirSync(ddir, { recursive: true });
+      const d = path.join(ddir, 'SKILL.md');
+      if (fs.existsSync(d)) {
+        if (UPDATE) { fs.copyFileSync(s, d); updated++; } else { skipped++; }
+      } else {
+        fs.copyFileSync(s, d); copied++;
+      }
+    }
+  }
+  return { copied, skipped, updated, filtered };
+}
+
 function resultMsg(label, { copied, skipped, updated, filtered = 0 }) {
   const parts = [];
   if (copied > 0) parts.push(`${copied} added`);
@@ -255,17 +291,17 @@ async function main() {
     );
     s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
   } else if (PLATFORM_KEY === 'cursor') {
-    s.start('Transforming Claude Code commands → Cursor rules (.mdc)...');
+    s.start('Transforming Claude Code skills → Cursor rules (.mdc)...');
     const cmdResult = cursorTransformer.copyAndTransform(
-      path.join(src, '.claude', 'commands'),
+      path.join(src, '.claude', 'skills'),
       cmdDstPath,
-      { langFilter, getLangDestName, update: UPDATE }
+      { lang: LANG, update: UPDATE }
     );
     s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
   } else {
-    s.start('Copying skill commands...');
-    const skillFilter = LITE ? (relPath) => LITE_SKILLS.has(liteSkillPath(relPath)) : null;
-    const cmdResult = copyDir(path.join(src, '.claude', 'commands'), cmdDstPath, true, skillFilter);
+    s.start('Copying Claude Code skills...');
+    const skillFilter = LITE ? (name) => LITE_SKILLS.has(name) : null;
+    const cmdResult = copyClaudeSkills(path.join(src, '.claude', 'skills'), cmdDstPath, skillFilter);
     s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
   }
 
@@ -426,10 +462,10 @@ async function main() {
         `   ${pc.cyan('claude .')}`,
         ``,
         `2. The 8 lite skills:`,
-        `   ${pc.cyan('/dev:analyze  /dev:implement  /dev:review  /dev:pr')}`,
-        `   ${pc.cyan('/dev:debug    /sec:review     /arch:adr     /docs:update')}`,
+        `   ${pc.cyan('/dev-analyze  /dev-implement  /dev-review  /dev-pr')}`,
+        `   ${pc.cyan('/dev-debug    /sec-review     /arch-adr     /docs-update')}`,
         ``,
-        `3. Workflow: ${pc.dim('/dev:analyze → /dev:implement → /dev:review → /dev:pr → merge')}`,
+        `3. Workflow: ${pc.dim('/dev-analyze → /dev-implement → /dev-review → /dev-pr → merge')}`,
         ``,
         `4. Want PM/BA/QA/Ops too? Upgrade later with:`,
         `   ${pc.cyan('npx agentic-development-lifecycle --update --yes')}`,
@@ -445,8 +481,8 @@ async function main() {
         `2. Open project in Claude Code:`,
         `   ${pc.cyan('claude .')}`,
         ``,
-        `3. Type ${pc.cyan('/')} to see available commands:`,
-        `   /pm:ideate  /ba:spec  /dev:analyze  /qa:testplan ...`,
+        `3. Skills auto-trigger from natural language (or type ${pc.cyan('/')} to invoke):`,
+        `   /pm-ideate  /ba-spec  /dev-analyze  /qa-testplan ...`,
       ].join('\n'),
       'Next steps'
     );

@@ -38,7 +38,7 @@ Claude Code `Agent()` tool hỗ trợ param `model: "haiku" | "sonnet" | "opus"`
 - Không build token usage dashboard hay logging
 - Không tự động switch model dựa theo response quality
 - Không support non-Anthropic models (OpenAI, Gemini)
-- Không implement runtime flag (`/dev:analyze --tier=budget`) trong Phase 1
+- Không implement runtime flag (`/dev-analyze --tier=budget`) trong Phase 1
 - Không implement Phase 2 config file (chỉ spec schema)
 
 ## 4. Actors & Use Cases

@@ -111,12 +111,12 @@ function Copy-Dir {
     }
 }
 
-# 1. Copy .claude/commands
-Write-Host "Copying skill commands..."
+# 1. Copy .claude/skills (Agent Skills — copies each skill folder verbatim, incl. SKILL.en/ja.md)
+Write-Host "Copying Claude Code skills..."
 $claudeTarget = Join-Path $TargetPath ".claude"
-$commandsTarget = Join-Path $claudeTarget "commands"
+$commandsTarget = Join-Path $claudeTarget "skills"
 if (-not (Test-Path $claudeTarget)) { New-Item -ItemType Directory -Path $claudeTarget | Out-Null }
-Copy-Dir (Join-Path $SourcePath ".claude\commands") $commandsTarget ".claude/commands/"
+Copy-Dir (Join-Path $SourcePath ".claude\skills") $commandsTarget ".claude/skills/"
 
 # 2. Copy agents
 Write-Host "Copying agent definitions..."
