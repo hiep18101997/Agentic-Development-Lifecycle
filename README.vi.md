@@ -48,6 +48,14 @@ Cập nhật bản cài đặt hiện tại:
 npx agentic-development-lifecycle --update --yes
 ```
 
+### Codex CLI
+
+```bash
+npx agentic-development-lifecycle --yes --codex
+```
+
+Tao 34 Codex skills trong `.agents/skills/` va them managed section ADLC vao `AGENTS.md` ma khong ghi de huong dan cua project. Codex mac dinh tieng Viet; dung `--lang en` hoac `--lang ja` de cai mot ngon ngu khac.
+
 ### OpenCode
 
 ```bash
@@ -282,7 +290,7 @@ docs/
   workflows/         # Sprint lifecycle, role guide, flowchart
   decisions/         # ADR templates
 templates/           # Skeleton templates
-bin/install.js       # Installer tương tác (@clack/prompts) — hỗ trợ --opencode
+bin/install.js       # Installer tương tác (@clack/prompts) — hỗ trợ --opencode | --codex
 setup.ps1            # PowerShell installer (Claude Code)
 setup.sh             # Bash installer (Claude Code)
 ```

@@ -16,7 +16,7 @@
     "@clack/prompts": "^0.9.0",
     "picocolors": "^1.1.0"
   },
-  "keywords": ["claude-code", "sdlc", "ai-agent", "agentic", "opencode", "cursor", "antigravity", "japanese", "jp-market", "bilingual", "bridge-engineer"],
+  "keywords": ["claude-code", "codex-cli", "sdlc", "ai-agent", "agentic", "opencode", "cursor", "antigravity", "japanese", "jp-market", "bilingual", "bridge-engineer"],
   "repository": {
     "type": "git",
     "url": "https://github.com/hiepdnh/Agentic-Development-Lifecycle.git"

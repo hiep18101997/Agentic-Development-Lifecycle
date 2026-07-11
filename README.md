@@ -22,7 +22,7 @@
 
 An **AI skill pack** for software development teams. Install it into any project to get structured, role-aware skills that cover every phase of the sprint lifecycle.
 
-Supports **Claude Code, OpenCode, Cursor, and Google Antigravity** — same skill source, different runtime targets (Cursor + Antigravity are transformed at install time from the canonical Claude Code source).
+Supports **Claude Code, Codex CLI, OpenCode, Cursor, and Google Antigravity** — same skill source, different runtime targets. Codex and Cursor are transformed at install time from the canonical Claude Code source.
 
 Works for any team that wants structured AI assistance — especially useful for outsource/consulting teams with client handoffs and multilingual deliverables.
 
@@ -47,6 +47,14 @@ Update an existing install:
 ```bash
 npx agentic-development-lifecycle --update --yes
 ```
+
+### Codex CLI
+
+```bash
+npx agentic-development-lifecycle --yes --codex
+```
+
+Generates 34 project-local Codex skills in `.agents/skills/` and adds an ADLC-managed section to `AGENTS.md` without overwriting existing project instructions. Codex installs one language at a time; `--codex` defaults to Vietnamese and also accepts `--lang en` or `--lang ja`.
 
 ### OpenCode
 
@@ -76,7 +84,7 @@ npx agentic-development-lifecycle --yes --antigravity
 
 Generates `.antigravity/skills/` (ported from OpenCode source — `task()` / `question()` syntax) + `AGENTS.md` (project context).
 
-What gets installed (all platforms): skills directory + `templates/` + `docs/workflows/` (and `agents/` for Claude Code only).
+What gets installed (all platforms): skills directory + `templates/` + `docs/workflows/` (and `agents/` for Claude Code only). Codex skills include the delegation contracts they need under each skill's `references/` directory.
 
 ### Language filter
 
@@ -308,7 +316,7 @@ Designed for consulting/outsource teams with structured client communication:
 .opencode/skills/         # 32 OpenCode skill files (hand-ported — task()/question() syntax)
 agents/                   # 8 subagent definitions (Claude Code only)
 bin/
-  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity
+  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --codex
   transformers/
     cursor.js             # .claude/skills/*/SKILL.md → .cursor/rules/*.mdc at install time
     antigravity.js        # .opencode/skills/ → .antigravity/skills/ alias

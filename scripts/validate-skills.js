@@ -16,6 +16,7 @@ function walk(dir) {
 }
 
 function parseFrontmatter(content) {
+  content = content.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
   const stripped = content.replace(/^﻿/, '');
   const m = stripped.match(/^---\n([\s\S]*?)\n---/);
   if (!m) return null;
