@@ -64,6 +64,9 @@ npx agentic-development-lifecycle --yes --cursor
 # Antigravity (.antigravity/skills/ + AGENTS.md — aliases OpenCode source)
 npx agentic-development-lifecycle --yes --antigravity
 
+# Codex CLI (.agents/skills/ + managed AGENTS.md section)
+npx agentic-development-lifecycle --yes --codex
+
 # Update existing install
 npx agentic-development-lifecycle --update --yes
 
@@ -78,7 +81,7 @@ npx agentic-development-lifecycle --yes --lang vi
 npx agentic-development-lifecycle --yes --lang all
 ```
 
-Mutually-exclusive platform flags: pass only one of `--opencode`, `--cursor`, `--antigravity`. Default (no flag) is Claude Code.
+Mutually-exclusive platform flags: pass only one of `--opencode`, `--cursor`, `--antigravity`, `--codex`. Default (no flag) is Claude Code. Codex defaults to `--lang vi` and requires a single language (`vi`, `en`, or `ja`).
 
 Developer Lite minimal install (Claude Code only — 8 dev/sec/arch/docs skills, no PM/BA/QA/Ops):
 
@@ -138,7 +141,7 @@ Checks per-skill: for Claude skills, each `.claude/skills/<skill>/` folder has `
 
 ### CI (GitHub Actions)
 
-- `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 4 platforms × {ubuntu, windows} on every PR, asserts 102 skill files copied + correct config file present.
+- `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 5 platforms × {ubuntu, windows} on every PR, asserts the expected skills and config file are present.
 - `.github/workflows/validate-skills.yml` — runs the validator above on every PR.
 
 ### Skill file anatomy
@@ -285,7 +288,7 @@ When adding new commands that need shell access, update `settings.json`.
 .opencode/skills/         # Hand port cho OpenCode (task() / question() syntax, role:command)
 agents/                   # Subagent definitions (spawned bởi orchestrator skills)
 bin/
-  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --lite
+  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --codex | --lite
   CLAUDE.lite.md          # Dropped-in as CLAUDE.md when --lite is set
   transformers/
     cursor.js             # Transform .claude/skills/*/SKILL.md → .cursor/rules/*.mdc at install

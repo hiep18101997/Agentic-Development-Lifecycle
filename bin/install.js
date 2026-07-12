@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const cursorTransformer = require('./transformers/cursor');
 const antigravityTransformer = require('./transformers/antigravity');
+const codexTransformer = require('./transformers/codex');
 
 const BANNER_CC = [
   ' ██╗   ██╗████████╗██╗    █████╗ ██████╗ ██╗      ██████╗ ',
@@ -74,6 +75,7 @@ function parsePlatform() {
   if (flags.includes('--cursor') || flags.includes('-c')) set.push('cursor');
   if (flags.includes('--antigravity') || flags.includes('-a')) set.push('antigravity');
   if (flags.includes('--opencode') || flags.includes('-o')) set.push('opencode');
+  if (flags.includes('--codex')) set.push('codex');
   if (set.length > 1) {
     console.error(pc.red(`Multiple platform flags set: ${set.join(', ')}. Pick only one.`));
     process.exit(1);
@@ -86,11 +88,15 @@ function parseLang() {
   const i = process.argv.findIndex((a) => a === '--lang' || a === '-l');
   if (i >= 0 && i + 1 < process.argv.length) {
     const v = process.argv[i + 1].toLowerCase();
+    if (PLATFORM_KEY === 'codex' && v === 'all') {
+      console.error(pc.red('Codex installs one language at a time. Use --lang vi, en, or ja.'));
+      process.exit(1);
+    }
     if (['ja', 'en', 'vi', 'all'].includes(v)) return v;
     console.error(pc.red(`Invalid --lang value: ${v}. Must be one of: ja, en, vi, all`));
     process.exit(1);
   }
-  return 'all';
+  return PLATFORM_KEY === 'codex' ? 'vi' : 'all';
 }
 const LANG = parseLang();
 
@@ -99,6 +105,7 @@ const PLATFORM_CONFIG = {
   opencode:    { label: 'OpenCode',     banner: BANNER_OC,     commandsDir: '.opencode/skills',   configFile: 'AGENTS.md' },
   cursor:      { label: 'Cursor',       banner: BANNER_CURSOR, commandsDir: '.cursor/rules',      configFile: '.cursorrules' },
   antigravity: { label: 'Antigravity',  banner: BANNER_AG,     commandsDir: '.antigravity/skills', configFile: 'AGENTS.md' },
+  codex:       { label: 'Codex CLI',    banner: BANNER_CC,     commandsDir: '.agents/skills',      configFile: 'AGENTS.md' },
 };
 const CFG = PLATFORM_CONFIG[PLATFORM_KEY];
 const BANNER = CFG.banner;
@@ -255,8 +262,9 @@ async function main() {
   }
 
   log.info(`Target: ${pc.green(dst)}`);
-  log.info(`Platform: ${pc.cyan(PLATFORM)} (use ${pc.dim('--opencode | --cursor | --antigravity')} to switch)`);
-  log.info(`Language: ${pc.cyan(LANG)} (use ${pc.dim('--lang ja|en|vi|all')} to filter)`);
+  log.info(`Platform: ${pc.cyan(PLATFORM)} (use ${pc.dim('--opencode | --cursor | --antigravity | --codex')} to switch)`);
+  const langHelp = PLATFORM_KEY === 'codex' ? '--lang ja|en|vi' : '--lang ja|en|vi|all';
+  log.info(`Language: ${pc.cyan(LANG)} (use ${pc.dim(langHelp)} to filter)`);
   if (LITE) log.info(`Mode: ${pc.magenta('Developer Lite')} ${pc.dim('— 8 skills only')}`);
 
   if (!YES) {
@@ -278,7 +286,15 @@ async function main() {
   const cmdDstPath = path.join(dst, COMMANDS_DIR);
   fs.mkdirSync(path.dirname(cmdDstPath), { recursive: true });
 
-  if (PLATFORM_KEY === 'opencode') {
+  if (PLATFORM_KEY === 'codex') {
+    s.start('Transforming Claude Code skills -> Codex skills...');
+    const cmdResult = codexTransformer.copyAndTransform(
+      path.join(src, '.claude', 'skills'),
+      cmdDstPath,
+      { lang: LANG, update: UPDATE, agentsDir: path.join(src, 'agents') }
+    );
+    s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
+  } else if (PLATFORM_KEY === 'opencode') {
     s.start('Copying OpenCode skill files...');
     const cmdResult = copyDir(path.join(src, '.opencode', 'skills'), cmdDstPath, true);
     s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
@@ -380,9 +396,14 @@ async function main() {
   );
 
   // 6. Main config file — varies per platform:
-  //    Claude Code → CLAUDE.md, OpenCode/Antigravity → AGENTS.md, Cursor → .cursorrules
+  //    Claude Code → CLAUDE.md, OpenCode/Antigravity/Codex → AGENTS.md, Cursor → .cursorrules
   const configDst = path.join(dst, CONFIG_FILE);
-  if (fs.existsSync(configDst) && !UPDATE) {
+  if (PLATFORM_KEY === 'codex') {
+    s.start(fs.existsSync(configDst) ? 'Updating ADLC section in AGENTS.md...' : 'Creating AGENTS.md...');
+    const existing = fs.existsSync(configDst) ? fs.readFileSync(configDst, 'utf8') : '';
+    fs.writeFileSync(configDst, codexTransformer.mergeManagedAgentsSection(existing));
+    s.stop(`${pc.green('◆')} AGENTS.md ${pc.dim('— ADLC managed section')}`);
+  } else if (fs.existsSync(configDst) && !UPDATE) {
     log.warn(`${CONFIG_FILE} already exists — merge manually`);
     log.info(`Reference: ${pc.dim(path.join(src, 'CLAUDE.md'))}`);
   } else {
@@ -403,7 +424,23 @@ async function main() {
 
   console.log();
 
-  if (PLATFORM_KEY === 'opencode') {
+  if (PLATFORM_KEY === 'codex') {
+    note(
+      [
+        `1. Review the ADLC managed section in ${pc.cyan('AGENTS.md')}.`,
+        `   Your existing project instructions remain outside that section.`,
+        ``,
+        `2. Codex discovers 34 skills from ${pc.cyan('.agents/skills/')}.`,
+        `   Installed language: ${pc.cyan(LANG)}.`,
+        ``,
+        `3. Start Codex in this project and make a natural request such as:`,
+        `   ${pc.dim('"Phân tích task này và đề xuất phương án implement"')}`,
+        ``,
+        `4. Skills delegate bounded subtasks when supported, then fall back to inline execution.`,
+      ].join('\n'),
+      'Next steps'
+    );
+  } else if (PLATFORM_KEY === 'opencode') {
     note(
       [
         `1. Open ${pc.cyan(CONFIG_FILE)} → update Project Context section`,

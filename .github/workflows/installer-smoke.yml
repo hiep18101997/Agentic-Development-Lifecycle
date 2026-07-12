@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        platform: [claude, opencode, cursor, antigravity]
+        platform: [claude, opencode, cursor, antigravity, codex]
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +36,7 @@ jobs:
             opencode)    flag="--opencode" ;;
             cursor)      flag="--cursor" ;;
             antigravity) flag="--antigravity" ;;
+            codex)       flag="--codex" ;;
           esac
           cd "$tmp"
           node "$GITHUB_WORKSPACE/bin/install.js" --yes $flag
@@ -65,7 +66,14 @@ jobs:
               count=$(find .antigravity/skills -name "*.md" | wc -l)
               test -f AGENTS.md || { echo "FAIL: AGENTS.md missing"; exit 1; }
               ;;
+            codex)
+              count=$(find .agents/skills -mindepth 2 -maxdepth 2 -name "SKILL.md" | wc -l)
+              test -f AGENTS.md || { echo "FAIL: AGENTS.md missing"; exit 1; }
+              node "$GITHUB_WORKSPACE/scripts/validate-codex-skills.js" .agents/skills
+              ;;
           esac
           count=$(echo "$count" | tr -d ' ')
-          test "$count" = "102" || { echo "FAIL: found $count skill files (expected 102)"; exit 1; }
+          expected=102
+          if [ "${{ matrix.platform }}" = "codex" ]; then expected=34; fi
+          test "$count" = "$expected" || { echo "FAIL: found $count skill files (expected $expected)"; exit 1; }
           echo "OK: $count skill files installed for ${{ matrix.platform }} on ${{ matrix.os }}"

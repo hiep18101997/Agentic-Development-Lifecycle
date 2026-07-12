@@ -51,6 +51,14 @@ npx agentic-development-lifecycle --yes --lang ja
 npx agentic-development-lifecycle --update --yes --lang ja
 ```
 
+### Codex CLI
+
+```bash
+npx agentic-development-lifecycle --yes --codex --lang ja
+```
+
+Creates 34 project-local skills in `.agents/skills/` and updates only the ADLC managed section in `AGENTS.md`. Codex installs one language at a time.
+
 ### OpenCode
 
 ```bash
@@ -303,7 +311,7 @@ docs/
   workflows/         # スプリントライフサイクル、ロールガイド、フローチャート
   decisions/         # ADR テンプレート
 templates/           # 全スキルが参照するスケルトンテンプレート
-bin/install.js       # インタラクティブインストーラ（@clack/prompts）— --opencode と --lang サポート
+bin/install.js       # インタラクティブインストーラ（@clack/prompts）— --opencode | --codex | --lang サポート
 setup.ps1            # PowerShell インストーラ（Claude Code）
 setup.sh             # Bash インストーラ（Claude Code）
 ```
