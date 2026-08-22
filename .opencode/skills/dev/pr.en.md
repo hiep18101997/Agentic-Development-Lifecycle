@@ -24,9 +24,11 @@ If the PR contains any sensitive changes from the list above → flag them clear
 
 ### Step 0 — Gate: Check review status
 
-Check if `docs/tasks/[TASK-ID]/verification.md` exists and contains a `review: approved` line (or equivalent).
+Find `docs/tasks/[TASK-ID]/review-log-R[N].md` with the highest N (the latest round — `/dev:review` always writes this file regardless of verdict). If it exists, read `Meta.verdict`:
+- `approve` or `approve-with-fixes` → review passed, continue to Step 1
+- `request-changes` → stop, tell the user there are unresolved `B-xx` blocking items — re-run `/dev:review` first
 
-If there is no indication that `/dev:review` has been run → use the `question` tool:
+If NO `review-log-R*.md` file exists at all → use the `question` tool:
 
 question({
   questions: [{

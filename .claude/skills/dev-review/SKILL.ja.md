@@ -35,12 +35,12 @@ description: >
 
 レビューレポート → Approve / Request Changes
 
-### レビューログ (Request Changes 時)
+### レビューログ (verdict を問わず毎回作成)
 
-verdict が `request-changes` の場合、`docs/tasks/[TASK-ID]/review-log-R[N].md` を `templates/review-log.ja.md` を使って作成:
-- Meta に task_id / round / verdict / JST タイムスタンプ を記入
-- ブロッキング表に `B-xx` ID、ファイル:行、問題、修正案を記入
-- 再レビュー時に AI が各 `B-xx` を自動検証
+`docs/tasks/[TASK-ID]/review-log-R[N].md` を `templates/review-log.ja.md` を使って **verdict に関わらず毎回作成**（Approve / Approve with minor fixes / Request Changes のいずれでも）。`/dev-pr` が最新ラウンドのこのファイルで review 済みかを判定するため、Request Changes 時のみ作成すると「未 review」と「approve 済み」を区別できない:
+- Meta に task_id / round / verdict（`approve` | `approve-with-fixes` | `request-changes`）/ JST タイムスタンプ を記入
+- Approve / Approve with minor fixes: ブロッキング表は空のまま
+- Request Changes: ブロッキング表に `B-xx` ID、ファイル:行、問題、修正案を記入 — 再レビュー時に AI が各 `B-xx` を自動検証
 
 ### 前ラウンドのレビューログ確認 (ステップ 1)
 

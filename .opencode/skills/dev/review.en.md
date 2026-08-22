@@ -204,24 +204,32 @@ question({
 
 ---
 
-### Step 6 — Conclusion
+### Step 6 — Conclusion + save review log
+
+Write `docs/tasks/[TASK-ID]/review-log-R[N].md` using template `templates/review-log.en.md` — **always write this file regardless of verdict** (Approve / Approve with minor fixes / Request Changes). `/dev:pr` reads the latest round of this file to determine whether review has happened; if it's only written on Request Changes, `/dev:pr` has no way to distinguish "never reviewed" from "approved".
+
+- Fill in Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch)
+- **Approve / Approve with minor fixes**: leave the Blocking table empty; populate Non-blocking if applicable
+- **Request Changes**: populate the Blocking table with IDs like `B-xx` — one row per issue with file:line + specific fix
 
 **If Approve / Approve with minor fixes:**
 ```
-Review hoàn tất. Verdict: [Approve / Approve with minor fixes]
+Review complete. Verdict: [Approve / Approve with minor fixes]
 
-[Danh sách non-blocking items nếu có — dev tự judge trước merge]
+[List of non-blocking items if any — dev to judge before merge]
 
+Review Log written: `docs/tasks/[TASK-ID]/review-log-R[N].md`
 Next step: /dev:pr
 ```
 
 **If Request Changes:**
 ```
-Review hoàn tất. Verdict: Request Changes
+Review complete. Verdict: Request Changes
 
-Cần fix trước khi merge:
-1. [Blocking issue 1 — file:line — fix cụ thể]
-2. [Blocking issue 2 — file:line — fix cụ thể]
+Must fix before merge:
+1. [Blocking issue 1 — file:line — specific fix]
+2. [Blocking issue 2 — file:line — specific fix]
 
-Sau khi fix xong, chạy lại /dev:review.
+Review Log written: `docs/tasks/[TASK-ID]/review-log-R[N].md`
+After fixes are done, re-run /dev:review.
 ```

@@ -204,7 +204,13 @@ question({
 
 ---
 
-### Bước 6 — Kết luận
+### Bước 6 — Kết luận + Lưu review log
+
+Ghi `docs/tasks/[TASK-ID]/review-log-R[N].md` dùng template `templates/review-log.md` — **LUÔN ghi file này bất kể verdict nào** (Approve / Approve with minor fixes / Request Changes). `/dev:pr` đọc round gần nhất của file này để xác định đã review chưa; nếu chỉ ghi khi Request Changes, `/dev:pr` không có cách nào phân biệt "chưa review" với "đã approve".
+
+- Điền đầy đủ Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch)
+- **Approve / Approve with minor fixes**: bảng Blocking để trống; populate Non-blocking nếu có
+- **Request Changes**: populate bảng Blocking với ID dạng `B-xx` — mỗi issue 1 row có file:line + fix cụ thể
 
 **Nếu Approve / Approve with minor fixes:**
 ```
@@ -212,6 +218,7 @@ Review hoàn tất. Verdict: [Approve / Approve with minor fixes]
 
 [Danh sách non-blocking items nếu có — dev tự judge trước merge]
 
+Review Log đã ghi: `docs/tasks/[TASK-ID]/review-log-R[N].md`
 Bước tiếp: /dev:pr
 ```
 
@@ -223,5 +230,6 @@ Cần fix trước khi merge:
 1. [Blocking issue 1 — file:line — fix cụ thể]
 2. [Blocking issue 2 — file:line — fix cụ thể]
 
+Review Log đã ghi: `docs/tasks/[TASK-ID]/review-log-R[N].md`
 Sau khi fix xong, chạy lại /dev:review.
 ```

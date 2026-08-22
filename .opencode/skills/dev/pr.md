@@ -24,9 +24,11 @@ Nếu PR chứa bất kỳ thay đổi nhạy cảm nào trong danh sách trên 
 
 ### Bước 0 — Gate: Kiểm tra review
 
-Kiểm tra `docs/tasks/[TASK-ID]/verification.md` có tồn tại và có dòng `review: approved` (hoặc tương đương) không.
+Tìm `docs/tasks/[TASK-ID]/review-log-R[N].md` với số N cao nhất (round gần nhất — `/dev:review` luôn ghi file này bất kể verdict). Nếu tồn tại, đọc `Meta.verdict`:
+- `approve` hoặc `approve-with-fixes` → review đã pass, tiếp tục Bước 1
+- `request-changes` → dừng, báo user còn `B-xx` blocking chưa fix, chạy lại `/dev:review` trước
 
-Nếu không tìm thấy dấu hiệu `/dev:review` đã chạy → dùng `question` tool:
+Nếu KHÔNG tìm thấy file `review-log-R*.md` nào → dùng `question` tool:
 
 question({
   questions: [{
