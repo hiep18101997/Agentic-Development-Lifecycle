@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-development-lifecycle.dev/schemas/task-to-pr.v1.json",
+  "title": "ADLC task-to-PR workflow manifest",
+  "description": "Declarative spec -> analyze -> implement -> review -> pr pipeline, matching the real artifact conventions used by .claude/skills/{ba-spec,dev-analyze,dev-implement,dev-review,dev-pr}. There is no separate 'verify' phase: dev-implement itself produces both the code diff and verification.md (see its Bước 5 Verification Gate).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "artifactRoot",
+    "runtimes",
+    "phases",
+    "prReadiness"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": { "const": "task-to-pr" },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "artifactRoot": { "const": "docs/tasks/{taskId}" },
+    "runtimes": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["claude-code", "opencode", "codex-cli"]
+      }
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": { "$ref": "#/$defs/phase" }
+    },
+    "prReadiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires", "acceptedReviewVerdicts"],
+      "properties": {
+        "requires": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "string" }
+        },
+        "acceptedReviewVerdicts": {
+          "const": ["approve", "approve-with-fixes"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "skill",
+        "requires",
+        "outputs",
+        "gates",
+        "runtimeSupport",
+        "retry",
+        "transitions"
+      ],
+      "properties": {
+        "id": {
+          "enum": ["spec", "analyze", "implement", "review", "pr"]
+        },
+        "skill": {
+          "enum": ["ba-spec", "dev-analyze", "dev-implement", "dev-review", "dev-pr"]
+        },
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "outputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/output" }
+        },
+        "gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["before", "after"],
+          "properties": {
+            "before": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "after": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "runtimeSupport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["claude-code", "opencode", "codex-cli"],
+          "properties": {
+            "claude-code": { "type": "boolean" },
+            "opencode": { "type": "boolean" },
+            "codex-cli": { "type": "boolean" }
+          }
+        },
+        "retry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy", "preserveArtifacts", "preserveAudit"],
+          "properties": {
+            "strategy": { "const": "new-attempt-same-phase" },
+            "preserveArtifacts": { "const": true },
+            "preserveAudit": { "const": true }
+          }
+        },
+        "transitions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["onApprove", "onChangesRequested", "onBlocked"],
+          "properties": {
+            "onApprove": {
+              "type": ["string", "null"]
+            },
+            "onChangesRequested": {
+              "type": "string"
+            },
+            "onBlocked": { "const": "blocked" }
+          }
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "required", "versionControl"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["markdown", "git-diff"] },
+        "path": { "type": "string" },
+        "required": { "const": true },
+        "versionControl": { "const": "task-branch" },
+        "roundBased": {
+          "type": "boolean",
+          "description": "True for outputs that accumulate as numbered rounds (e.g. review-log-R{round}.md) instead of being overwritten in place. Only the review phase's review_log output uses this today."
+        }
+      }
+    }
+  }
+}
