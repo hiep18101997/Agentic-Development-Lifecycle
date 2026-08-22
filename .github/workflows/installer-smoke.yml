@@ -73,7 +73,7 @@ jobs:
               ;;
           esac
           count=$(echo "$count" | tr -d ' ')
-          expected=102
-          if [ "${{ matrix.platform }}" = "codex" ]; then expected=34; fi
+          expected=105
+          if [ "${{ matrix.platform }}" = "codex" ]; then expected=35; fi
           test "$count" = "$expected" || { echo "FAIL: found $count skill files (expected $expected)"; exit 1; }
           echo "OK: $count skill files installed for ${{ matrix.platform }} on ${{ matrix.os }}"
