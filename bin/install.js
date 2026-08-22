@@ -528,7 +528,7 @@ async function main() {
         `1. Review the ADLC managed section in ${pc.cyan('AGENTS.md')}.`,
         `   Your existing project instructions remain outside that section.`,
         ``,
-        `2. Codex discovers 34 skills from ${pc.cyan('.agents/skills/')}.`,
+        `2. Codex discovers 35 skills from ${pc.cyan('.agents/skills/')}.`,
         `   Installed language: ${pc.cyan(LANG)}.`,
         ``,
         `3. Start Codex in this project and make a natural request such as:`,

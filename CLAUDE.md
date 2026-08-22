@@ -12,7 +12,7 @@ Framework hỗ trợ toàn bộ SDLC cho mọi role. Dùng được cho bất k�
 
 This repo IS the framework source. Two hand-maintained skill trees serve as canonical sources:
 
-- `.claude/skills/` — Claude Code **Agent Skills** (34 skills × 3 langs = 102 `SKILL*.md` files). Each skill is a flat folder `.claude/skills/<role-command>/` holding `SKILL.md` (VN) + `SKILL.en.md` + `SKILL.ja.md`. Skills **auto-trigger** from their `description` frontmatter and can also be invoked explicitly as `/role-command` (e.g. `/ba-spec`).
+- `.claude/skills/` — Claude Code **Agent Skills** (35 skills × 3 langs = 105 `SKILL*.md` files). Each skill is a flat folder `.claude/skills/<role-command>/` holding `SKILL.md` (VN) + `SKILL.en.md` + `SKILL.ja.md`. Skills **auto-trigger** from their `description` frontmatter and can also be invoked explicitly as `/role-command` (e.g. `/ba-spec`).
 - `.opencode/skills/` — OpenCode hand port (102 files) with `task()` / `question()` syntax, nested `<role>/<name>.md`, invoked as `role:command`.
 
 Cursor and Antigravity targets are **generated at install time** from these sources — no separate hand-maintained tree:
@@ -213,6 +213,8 @@ Each agent file defines an **input contract** and **output JSON shape**. When sp
 | `planner` | `/dev-analyze` | sonnet | Synthesize task + code map → 2-3 implementation options |
 | `diff-reader` | `/dev-pr`, `/docs-update` | haiku | Summarize git diff for PR description |
 | `review-reader` | `/dev-review` | haiku | Parse diff → code/arch/security signals cho 3-lens review |
+| `autopilot-reviewer` | `/dev-autopilot` | sonnet | Read-only evaluator (Evaluator A) → JSON verdict cho autonomous loop |
+| `autopilot-adversary` | `/dev-autopilot` | sonnet | Read-only evaluator (Evaluator B, blind, adversarial) → JSON verdict; cùng `autopilot-reviewer` tạo cặp 2-evaluator + anti-sycophancy re-check |
 | `test-gen` | `/qa-testplan` | sonnet | Generate test cases from spec |
 | `doc-updater` | `/docs-update` | sonnet | Update baseline docs after verification |
 | `pr-resolver` | `/dev-pr` | sonnet | Analyze PR review comments → propose fixes per comment |
@@ -329,6 +331,7 @@ setup.ps1 / setup.sh      # Shell-based installer alternatives (Claude Code only
 | Dev | `/dev-review` | Review toàn diện: code quality + architecture + performance + security trong 1 lần |
 | Dev | `/dev-pr` | Code changes → PR description (hỗ trợ PR comment resolver) |
 | Dev | `/dev-debug` | Systematic debugging: reproduce → localize → fix |
+| Dev | `/dev-autopilot` | Autonomy harness có state bền vững, 2-evaluator loop và escalation theo rủi ro (opt-in, cần user cấp quyền rõ ràng) |
 | Arch | `/arch-review` | Review design decision |
 | Arch | `/arch-adr` | Generate Architecture Decision Record |
 | QA | `/qa-testplan` | Spec → Test plan |
@@ -387,8 +390,10 @@ Lane: tiny | normal | high-risk
 ```
 
 - **Tiny** → patch trực tiếp, bỏ qua analysis.md
-- **Normal** → chạy đủ dev:analyze → dev:implement → dev:review → dev:pr
-- **High-risk** → dừng, hỏi senior trước khi tiếp tục
+- **Normal** → chọn manual lane (`dev-analyze → dev-implement → dev-review → dev-pr`) hoặc explicit autonomous lane (`/dev-autopilot` — cần user cấp autonomy envelope trước khi sửa file)
+- **High-risk** → dừng, hỏi senior trước khi tiếp tục; nếu dùng `/dev-autopilot`, Ask First gate vẫn bắt buộc và approval không waive evaluator loop
+
+`/dev-autopilot` là lane riêng, không gọi nested `/dev-review`: nó dùng 2 evaluator read-only mù với nhau (`autopilot-reviewer` + `autopilot-adversary`) và JSON verdict để tránh các human gate của manual review làm đứt loop; nếu cả hai đồng thuận `pass`, chạy thêm 1 devil's-advocate re-check trước khi finalize (anti-sycophancy). Xem `docs/agent-harness.md`.
 
 ### Ask First Gate (thay đổi nhạy cảm)
 Dừng ngay và hỏi senior trước khi thực hiện (xem đầy đủ tại `assets/ask-first-gates.md`):
@@ -424,7 +429,7 @@ Output từ subagent được tóm tắt trước khi pass vào subagent tiếp 
 
 Model được chỉ định per-agent để tối ưu token (xem frontmatter `model:` trong mỗi file `agents/*.md`):
 - **haiku**: read-only/parse agents (task-reader, code-scout, diff-reader, review-reader)
-- **sonnet**: reasoning/synthesis agents (planner, doc-updater, test-gen)
+- **sonnet**: reasoning/synthesis agents (planner, doc-updater, test-gen, autopilot-reviewer, autopilot-adversary)
 
 Subagent definitions: `agents/` folder.
 
@@ -437,6 +442,8 @@ Subagent definitions: `agents/` folder.
 - `analysis.md` — options đã cân nhắc
 - `test-plan.md` — test cases
 - `verification.md` — test results, sign-off
+- `review-log-R[N].md` — review verdict theo round (template: `templates/review-log.md`), ghi bởi `/dev-review` mỗi lần chạy bất kể verdict
+- `agent-state.md` — resumable state cho `/dev-autopilot` (template trong `docs/agent-harness.md`)
 - `audit.md` — append-only log mọi skill chạy + user input verbatim (template: `templates/audit.md`)
 
 **Type 2 — Baseline Docs** (cập nhật sau verify)

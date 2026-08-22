@@ -36,7 +36,7 @@ for (const entry of skillDirs) {
   }
 }
 
-if (skillDirs.length !== 34) errors.push(`expected 34 skills, found ${skillDirs.length}`);
+if (skillDirs.length !== 35) errors.push(`expected 35 skills, found ${skillDirs.length}`);
 if (errors.length) {
   console.error('CODEX SKILL VALIDATION FAILED:');
   errors.forEach((error) => console.error(`  - ${error}`));
