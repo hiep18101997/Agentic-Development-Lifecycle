@@ -1,0 +1,15 @@
+{
+  "name": "adlc-task-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PoC MCP server exposing get_task_status + get_risk_classification for ADLC's docs/tasks/ and docs/risk-classifier.md conventions. Read-only. No dependencies.",
+  "main": "server.js",
+  "bin": {
+    "adlc-task-mcp": "server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "license": "MIT"
+}
