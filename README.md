@@ -48,6 +48,12 @@ Update an existing install:
 npx agentic-development-lifecycle --update --yes
 ```
 
+> **File count:** the command above with no `--lang` flag installs **all 3 languages** (Vietnamese +
+> English + Japanese, ~181 files). Add `--lang vi` (or `en` / `ja`) to install one language only —
+> roughly a third of the files. `CLAUDE.md`, `templates/`, and `docs/validation-matrix.md` are never
+> overwritten once they exist (including on `--update`) so your edits are safe — see
+> [Language filter](#language-filter).
+
 ### Codex CLI
 
 ```bash

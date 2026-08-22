@@ -17,6 +17,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - **`packages/developer-lite/`** — the standalone sub-package and its broken `npx github:hiepdnh/Agentic-Development-Lifecycle/packages/developer-lite --yes` install path (npm doesn't support subdirectories of GitHub repos via npx, so the command silently no-op'd). Use `--lite` on the main installer instead.
 
+### Fixed
+
+- **`bin/install.js --update` no longer destroys user customizations.** Confirmed by direct reproduction: an existing `CLAUDE.md`/`AGENTS.md`/`.cursorrules` (Claude Code/OpenCode/Antigravity/Cursor targets) was being **completely replaced** by the framework's own template on every `--update` run — any project-specific edits were silently lost. This contradicted the installer's own documented policy ("Do not overwrite existing files — Skip and inform the user to merge manually"). `--update` now treats an existing config file the same safe way a fresh install already does — skip + warn (with a message explaining *why*, pointing at the framework's version to diff manually) — instead of overwriting. Codex CLI was never affected (it already merges into a marked section).
+- **`templates/*` no longer overwritten on `--update`.** Templates are documented as user-customizable skeletons; a hand-edited template now survives `--update` (new templates not yet present still get added).
+- **`docs/validation-matrix.md` no longer overwritten on `--update`.** It's a living document populated by agents/users during real use (see `docs/improvement-backlog.md` IB-002) — it was miscategorized alongside static reference docs (`risk-classifier.md`, which correctly keeps always-overwriting) and is now protected the same way as `docs/improvement-backlog.md`.
+- **Installer now shows an estimated file count before the confirm prompt** — a totally default install (no `--lang` flag) drops all 3 languages onto disk (~181 files for Claude Code) with no prior warning; the confirm message and a `log.info` line now show `~N files` for the actual platform/lang/`--lite` combination.
+- Reference path in the "already exists — merge manually" warning for OpenCode/Antigravity now correctly points at `AGENTS.md` instead of always citing `CLAUDE.md`.
+
 ---
 
 ## [1.3.0] — 2026-05-15
