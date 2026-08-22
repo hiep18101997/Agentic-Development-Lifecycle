@@ -31,13 +31,13 @@ function transformSkill(source, skillName) {
   return `---\nname: ${skillName}\ndescription: ${description}\n---\n\n${transformBody(body, skillName)}`;
 }
 
-function transformAgentContract(source) {
+function transformAgentContract(source, contractLabel = 'Codex') {
   let result = normalize(source).replace(/^---\n[\s\S]*?\n---\n/, '');
   result = result
     .replace(/\*\*Recommended model\*\*:\s*(?:haiku|sonnet)[^\n]*\n?/gi, '')
     .replace(/\bmodel:\s*(?:haiku|sonnet)\b/gi, 'execution: delegate when available')
     .replace(/\b(?:haiku|sonnet)\b/gi, 'specialist');
-  return `# Codex Delegation Contract\n\n${result}`;
+  return `# ${contractLabel} Delegation Contract\n\n${result}`;
 }
 
 function referencedAgents(source) {
@@ -46,7 +46,7 @@ function referencedAgents(source) {
 }
 
 function copyAndTransform(srcDir, dstDir, opts = {}) {
-  const { lang, update, agentsDir } = opts;
+  const { lang, update, agentsDir, contractLabel } = opts;
   if (!fs.existsSync(srcDir)) return { copied: 0, skipped: 0, updated: 0, filtered: 0 };
   fs.mkdirSync(dstDir, { recursive: true });
   let copied = 0;
@@ -75,7 +75,7 @@ function copyAndTransform(srcDir, dstDir, opts = {}) {
       if (!fs.existsSync(agentPath)) continue;
       const referenceDir = path.join(skillDir, 'references');
       fs.mkdirSync(referenceDir, { recursive: true });
-      fs.writeFileSync(path.join(referenceDir, agentName), transformAgentContract(fs.readFileSync(agentPath, 'utf8')));
+      fs.writeFileSync(path.join(referenceDir, agentName), transformAgentContract(fs.readFileSync(agentPath, 'utf8'), contractLabel));
     }
     if (exists) updated++; else copied++;
   }

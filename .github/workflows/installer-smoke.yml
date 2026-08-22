@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        platform: [claude, opencode, cursor, antigravity, codex]
+        platform: [claude, opencode, cursor, antigravity, codex, copilot]
 
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +37,7 @@ jobs:
             cursor)      flag="--cursor" ;;
             antigravity) flag="--antigravity" ;;
             codex)       flag="--codex" ;;
+            copilot)     flag="--copilot" ;;
           esac
           cd "$tmp"
           node "$GITHUB_WORKSPACE/bin/install.js" --yes $flag
@@ -71,9 +72,14 @@ jobs:
               test -f AGENTS.md || { echo "FAIL: AGENTS.md missing"; exit 1; }
               node "$GITHUB_WORKSPACE/scripts/validate-codex-skills.js" .agents/skills
               ;;
+            copilot)
+              count=$(find .github/skills -mindepth 2 -maxdepth 2 -name "SKILL.md" | wc -l)
+              test -f .github/copilot-instructions.md || { echo "FAIL: .github/copilot-instructions.md missing"; exit 1; }
+              node "$GITHUB_WORKSPACE/scripts/validate-codex-skills.js" .github/skills
+              ;;
           esac
           count=$(echo "$count" | tr -d ' ')
           expected=105
-          if [ "${{ matrix.platform }}" = "codex" ]; then expected=35; fi
+          if [ "${{ matrix.platform }}" = "codex" ] || [ "${{ matrix.platform }}" = "copilot" ]; then expected=35; fi
           test "$count" = "$expected" || { echo "FAIL: found $count skill files (expected $expected)"; exit 1; }
           echo "OK: $count skill files installed for ${{ matrix.platform }} on ${{ matrix.os }}"

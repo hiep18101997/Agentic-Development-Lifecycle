@@ -42,4 +42,4 @@ if (errors.length) {
   errors.forEach((error) => console.error(`  - ${error}`));
   process.exit(1);
 }
-console.log(`Codex: ${skillDirs.length} skills validated.`);
+console.log(`${root}: ${skillDirs.length} skills validated.`);
