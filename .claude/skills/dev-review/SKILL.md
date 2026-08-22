@@ -196,7 +196,13 @@ Dùng `AskUserQuestion` tool:
 
 ---
 
-### Bước 6 — Kết luận
+### Bước 6 — Kết luận + Lưu review log
+
+Ghi `docs/tasks/[TASK-ID]/review-log-R[N].md` dùng template `templates/review-log.md` — **LUÔN ghi file này bất kể verdict nào** (Approve / Approve with minor fixes / Request Changes). `/dev-pr` đọc round gần nhất của file này để xác định đã review chưa; nếu chỉ ghi khi Request Changes, `/dev-pr` không có cách nào phân biệt "chưa review" với "đã approve".
+
+- Điền đầy đủ Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch)
+- **Approve / Approve with minor fixes**: bảng Blocking để trống (không row nào); populate Non-blocking nếu Lens phát hiện gì
+- **Request Changes**: populate bảng Blocking với ID dạng `B-xx` — mỗi issue 1 row có file:line + fix cụ thể; populate Ask First nếu có
 
 **Nếu Approve / Approve with minor fixes:**
 ```
@@ -204,17 +210,11 @@ Review hoàn tất. Verdict: [Approve / Approve with minor fixes]
 
 [Danh sách non-blocking items nếu có — dev tự judge trước merge]
 
+Review Log đã ghi: `docs/tasks/[TASK-ID]/review-log-R[N].md`
 Bước tiếp: /dev-pr
 ```
 
 **Nếu Request Changes:**
-
-Ghi `docs/tasks/[TASK-ID]/review-log-R[N].md` dùng template `templates/review-log.md`:
-- Điền đầy đủ Meta (task_id, round, verdict: request-changes, timestamp JST)
-- Populate bảng Blocking với ID dạng `B-xx` — mỗi issue 1 row có file:line + fix cụ thể
-- Populate bảng Ask First nếu có
-- Populate bảng Non-blocking
-
 ```
 Review hoàn tất. Verdict: Request Changes
 

@@ -24,9 +24,11 @@ If the PR contains any sensitive changes from the list above → flag it clearly
 
 ### Step 0 — Gate: Verify review
 
-Check that `docs/tasks/[TASK-ID]/verification.md` exists and contains a line like `review: approved` (or equivalent).
+Find `docs/tasks/[TASK-ID]/review-log-R[N].md` with the highest N (the latest round — `/dev-review` always writes this file regardless of verdict). If it exists, read `Meta.verdict`:
+- `approve` or `approve-with-fixes` → review passed, continue to Step 1
+- `request-changes` → stop, tell the user there are unresolved `B-xx` blocking items in the review log — re-run `/dev-review` after fixing, don't open a PR while the latest round's verdict is request-changes
 
-If no evidence of `/dev-review` having run is found → use `AskUserQuestion`:
+If NO `review-log-R*.md` file exists at all (`/dev-review` never ran) → use `AskUserQuestion`:
 - **Question**: Has `/dev-review` been run and approved?
 - Options: `Approved — continue` / `Not yet — run /dev-review first`
 
