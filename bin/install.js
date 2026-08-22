@@ -150,7 +150,11 @@ function langFilter(filename, siblingNames = new Set()) {
   return true;
 }
 
-function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRoot = '') {
+// protectExisting: when true, an existing destination file is NEVER overwritten, even with --update.
+// Used for templates/ — README documents these as user-customizable skeletons, so an --update run
+// must not silently clobber a hand-edited template (matches the exists-guard already used for
+// docs/improvement-backlog.md and docs/validation-matrix.md below).
+function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRoot = '', protectExisting = false) {
   if (!fs.existsSync(srcDir)) return { copied: 0, skipped: 0, updated: 0, filtered: 0 };
   fs.mkdirSync(dstDir, { recursive: true });
   let copied = 0, skipped = 0, updated = 0, filtered = 0;
@@ -160,7 +164,7 @@ function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRo
     const s = path.join(srcDir, entry.name);
     const relPath = relRoot ? `${relRoot}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
-      const sub = copyDir(s, path.join(dstDir, entry.name), filterEnabled, pathFilter, relPath);
+      const sub = copyDir(s, path.join(dstDir, entry.name), filterEnabled, pathFilter, relPath, protectExisting);
       copied += sub.copied;
       skipped += sub.skipped;
       updated += sub.updated;
@@ -177,7 +181,7 @@ function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRo
       const dstName = filterEnabled ? getLangDestName(entry.name) : entry.name;
       const d = path.join(dstDir, dstName);
       if (fs.existsSync(d)) {
-        if (UPDATE) {
+        if (UPDATE && !protectExisting) {
           fs.copyFileSync(s, d);
           updated++;
         } else {
@@ -190,6 +194,42 @@ function copyDir(srcDir, dstDir, filterEnabled = false, pathFilter = null, relRo
     }
   }
   return { copied, skipped, updated, filtered };
+}
+
+// Read-only file-count estimate (mirrors copyDir's own traversal + langFilter) used to warn the user
+// how many files a given platform/lang combo will drop into their project, BEFORE they confirm.
+function countFiles(srcDir, filterEnabled = false) {
+  if (!fs.existsSync(srcDir)) return 0;
+  let count = 0;
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  const siblingNames = new Set(entries.filter((e) => !e.isDirectory()).map((e) => e.name));
+  for (const entry of entries) {
+    const s = path.join(srcDir, entry.name);
+    if (entry.isDirectory()) {
+      count += countFiles(s, filterEnabled);
+    } else if (!filterEnabled || langFilter(entry.name, siblingNames)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+// Same estimate logic as copyClaudeSkills' fan-out, without touching disk.
+function countClaudeSkills(srcSkillsDir, skillFilter = null) {
+  if (!fs.existsSync(srcSkillsDir)) return 0;
+  let count = 0;
+  for (const skill of fs.readdirSync(srcSkillsDir, { withFileTypes: true })) {
+    if (!skill.isDirectory()) continue;
+    if (skillFilter && !skillFilter(skill.name)) continue;
+    const skillDir = path.join(srcSkillsDir, skill.name);
+    const has = (n) => fs.existsSync(path.join(skillDir, n));
+    if (LANG === 'all') {
+      count += 1 + (has('SKILL.en.md') ? 1 : 0) + (has('SKILL.ja.md') ? 1 : 0);
+    } else {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 // Copy Claude Code Agent Skills from source `.claude/skills/<skill>/SKILL[.lang].md`.
@@ -267,10 +307,37 @@ async function main() {
   log.info(`Language: ${pc.cyan(LANG)} (use ${pc.dim(langHelp)} to filter)`);
   if (LITE) log.info(`Mode: ${pc.magenta('Developer Lite')} ${pc.dim('— 8 skills only')}`);
 
+  // Approximate file count for this platform+lang(+lite) combo, shown BEFORE the user confirms — the
+  // default (no --lang flag) installs all 3 languages and can be ~2-3x more files than a single
+  // language. "~" because codex routes through a transformer whose output count can differ slightly.
+  const skillFilter = LITE ? (name) => LITE_SKILLS.has(name) : null;
+  const agentFilterForCount = LITE ? (relPath) => LITE_AGENTS.has(relPath) : null;
+  let estFiles = (PLATFORM_KEY === 'opencode' || PLATFORM_KEY === 'antigravity')
+    ? countFiles(path.join(src, '.opencode', 'skills'), true)
+    : countClaudeSkills(path.join(src, '.claude', 'skills'), skillFilter);
+  estFiles += countFiles(path.join(src, 'templates'), true);
+  if (PLATFORM_KEY === 'claude') {
+    // countFiles' filterEnabled path doesn't know about the LITE agent allow-list; approximate it
+    // by counting only matching files directly when LITE, otherwise the full lang-filtered count.
+    estFiles += LITE
+      ? (fs.existsSync(path.join(src, 'agents')) ? fs.readdirSync(path.join(src, 'agents')).filter((f) => (agentFilterForCount ? agentFilterForCount(f) : true)).length : 0)
+      : countFiles(path.join(src, 'agents'), true);
+  }
+  if (!LITE) {
+    estFiles += countFiles(path.join(src, 'docs', 'workflows'), true) + 5; // docRootFiles + config file + a few gitkeeps
+  } else {
+    estFiles += 1; // config file only
+  }
+  if (LANG !== 'all') {
+    log.info(`Estimated files: ${pc.cyan(`~${estFiles}`)}`);
+  } else {
+    log.info(`Estimated files: ${pc.cyan(`~${estFiles}`)} ${pc.dim('(add --lang vi|en|ja to install one language only — about a third of this)')}`);
+  }
+
   if (!YES) {
     const action = UPDATE ? 'Update' : 'Install';
     const ok = await confirm({
-      message: `${action} ${PLATFORM} framework into ${pc.bold(path.basename(dst))}?`,
+      message: `${action} ${PLATFORM} framework (~${estFiles} files, lang: ${LANG}) into ${pc.bold(path.basename(dst))}?`,
     });
     if (isCancel(ok) || !ok) {
       cancel(`${action} cancelled.`);
@@ -329,9 +396,11 @@ async function main() {
     s.stop(resultMsg('agents/', agentsResult));
   }
 
-  // 3. templates — lang-aware (.html files always pass filter via langFilter)
+  // 3. templates — lang-aware (.html files always pass filter via langFilter).
+  // protectExisting=true: README documents these as user-customizable skeletons — --update must not
+  // clobber a template the user has already hand-edited. New templates (not yet on disk) still copy.
   s.start('Copying templates...');
-  const templatesResult = copyDir(path.join(src, 'templates'), path.join(dst, 'templates'), true);
+  const templatesResult = copyDir(path.join(src, 'templates'), path.join(dst, 'templates'), true, null, '', true);
   s.stop(resultMsg('templates/', templatesResult));
 
   const docsDst = path.join(dst, 'docs');
@@ -343,9 +412,10 @@ async function main() {
     const workflowsResult = copyDir(path.join(src, 'docs', 'workflows'), path.join(docsDst, 'workflows'), true);
     s.stop(resultMsg('docs/workflows/', workflowsResult));
 
-    // 4b. docs root framework files (always overwrite on --update) — lang-aware
+    // 4b. docs root framework files (always overwrite on --update — static reference docs, not
+    // meant to be hand-edited, same category as skill files) — lang-aware
     s.start('Copying framework doc files...');
-    const docRootFiles = ['risk-classifier.md', 'risk-classifier.ja.md', 'validation-matrix.md'];
+    const docRootFiles = ['risk-classifier.md', 'risk-classifier.ja.md'];
     const docRootSiblings = new Set(docRootFiles);
     let docRootCopied = 0, docRootUpdated = 0, docRootFiltered = 0;
     for (const file of docRootFiles) {
@@ -375,6 +445,16 @@ async function main() {
       fs.copyFileSync(backlogSrc, backlogDst);
       log.info(`${pc.green('◆')} docs/improvement-backlog.md ${pc.dim('— created')}`);
     }
+
+    // 4e. validation-matrix.md — LIVING doc (docs/improvement-backlog.md IB-002: agents/users populate
+    // it during real use). Only if missing, never overwritten — same exists-guard as improvement-backlog
+    // above, NOT the "always overwrite" docRootFiles treatment (it used to be miscategorized there).
+    const vmSrc = path.join(src, 'docs', 'validation-matrix.md');
+    const vmDst = path.join(docsDst, 'validation-matrix.md');
+    if (fs.existsSync(vmSrc) && !fs.existsSync(vmDst)) {
+      fs.copyFileSync(vmSrc, vmDst);
+      log.info(`${pc.green('◆')} docs/validation-matrix.md ${pc.dim('— created')}`);
+    }
   }
 
   // 5. empty doc dirs
@@ -403,11 +483,29 @@ async function main() {
     const existing = fs.existsSync(configDst) ? fs.readFileSync(configDst, 'utf8') : '';
     fs.writeFileSync(configDst, codexTransformer.mergeManagedAgentsSection(existing));
     s.stop(`${pc.green('◆')} AGENTS.md ${pc.dim('— ADLC managed section')}`);
-  } else if (fs.existsSync(configDst) && !UPDATE) {
-    log.warn(`${CONFIG_FILE} already exists — merge manually`);
-    log.info(`Reference: ${pc.dim(path.join(src, 'CLAUDE.md'))}`);
+  } else if (fs.existsSync(configDst)) {
+    // NOTE: this branch used to be gated on `&& !UPDATE`, which meant an explicit --update fell
+    // through to the unconditional copy below and completely replaced the user's CLAUDE.md/AGENTS.md/
+    // .cursorrules with the framework's own template — destroying any customization. This file is the
+    // one users are explicitly told to edit ("Customization per project" in CLAUDE.md), so it must
+    // never be silently overwritten, --update or not — matching the documented installer policy
+    // ("Do not overwrite existing files — Skip and inform the user to merge manually"). codex is
+    // unaffected — it merges into a marked section above.
+    const referenceSrc = (PLATFORM_KEY === 'opencode' || PLATFORM_KEY === 'antigravity')
+      && fs.existsSync(path.join(src, 'AGENTS.md'))
+      ? path.join(src, 'AGENTS.md')
+      : path.join(src, 'CLAUDE.md');
+    if (UPDATE) {
+      log.warn(`${CONFIG_FILE} already exists — skipped to protect your edits; framework doc changes were NOT merged`);
+      log.info(`To update manually, compare against: ${pc.dim(referenceSrc)}`);
+    } else {
+      log.warn(`${CONFIG_FILE} already exists — merge manually`);
+      log.info(`Reference: ${pc.dim(referenceSrc)}`);
+    }
   } else {
-    s.start(UPDATE ? `Updating ${CONFIG_FILE}...` : `Copying ${CONFIG_FILE}...`);
+    // Only reached when configDst does not exist yet — a genuine fresh install, including the very
+    // first --update run before this file has ever been created.
+    s.start(`Copying ${CONFIG_FILE}...`);
     if (PLATFORM_KEY === 'opencode' || PLATFORM_KEY === 'antigravity') {
       const ocConfigSrc = path.join(src, 'AGENTS.md');
       const ccConfigSrc = path.join(src, 'CLAUDE.md');
