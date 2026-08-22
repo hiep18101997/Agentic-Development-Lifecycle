@@ -1,0 +1,73 @@
+{
+  "valid": {
+    "source": "../../../docs/workflows/task-to-pr.v1.json"
+  },
+  "invalid": [
+    {
+      "name": "wrong phase order",
+      "operation": "swapPhases",
+      "args": [0, 1],
+      "expectedError": "phase order"
+    },
+    {
+      "name": "unresolved artifact prerequisite",
+      "operation": "set",
+      "path": "phases.1.requires.0",
+      "value": "artifact:not_created",
+      "expectedError": "unresolved artifact prerequisite"
+    },
+    {
+      "name": "unsafe artifact path",
+      "operation": "set",
+      "path": "phases.3.outputs.0.path",
+      "value": "../review-log-R{round}.md",
+      "expectedError": "must stay under docs/tasks/{taskId}"
+    },
+    {
+      "name": "runtime omitted",
+      "operation": "delete",
+      "path": "phases.2.runtimeSupport.codex-cli",
+      "expectedError": "runtimeSupport.codex-cli"
+    },
+    {
+      "name": "review output drift (loses {round})",
+      "operation": "set",
+      "path": "phases.3.outputs.0.path",
+      "value": "docs/tasks/{taskId}/review-log.md",
+      "expectedError": "round-numbered"
+    },
+    {
+      "name": "roundBased flag missing on review output",
+      "operation": "delete",
+      "path": "phases.3.outputs.0.roundBased",
+      "expectedError": "roundBased: true"
+    },
+    {
+      "name": "roundBased true but path has no {round} placeholder",
+      "operation": "set",
+      "path": "phases.3.outputs.0.path",
+      "value": "docs/tasks/{taskId}/review-log.md",
+      "expectedError": "round-numbered"
+    },
+    {
+      "name": "retry drops preserveArtifacts on a failed attempt",
+      "operation": "delete",
+      "path": "phases.2.retry.preserveArtifacts",
+      "expectedError": "must preserve artifacts/audit"
+    },
+    {
+      "name": "retry uses a non-same-phase strategy",
+      "operation": "set",
+      "path": "phases.2.retry.strategy",
+      "value": "restart-workflow",
+      "expectedError": "must preserve artifacts/audit"
+    },
+    {
+      "name": "review's changes-requested target must be implement, not review",
+      "operation": "set",
+      "path": "phases.3.transitions.onChangesRequested",
+      "value": "review",
+      "expectedError": "changes-requested -> implement"
+    }
+  ]
+}

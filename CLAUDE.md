@@ -144,6 +144,22 @@ Checks per-skill: for Claude skills, each `.claude/skills/<skill>/` folder has `
 - `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 5 platforms × {ubuntu, windows} on every PR, asserts the expected skills and config file are present.
 - `.github/workflows/validate-skills.yml` — runs the validator above on every PR.
 
+### Workflow manifest + executor PoC (task-to-pr.v1.json)
+
+`docs/workflows/task-to-pr.v1.json` (+ `task-to-pr.schema.v1.json`) declares the spec → analyze → implement → review → pr pipeline as phases with `requires`/`outputs`/`gates`/`retry`/`transitions`. There is no separate "verify" phase — `dev-implement` itself produces both the code diff and `verification.md` (its own Bước 5 Verification Gate). `review` is special: its output (`review-log-R{round}.md`) is `roundBased` — a fresh numbered file per round, not an overwrite-in-place retry — and a `request-changes` verdict transitions back to `implement`, not to another attempt of `review` itself. `scripts/validate-workflow-manifest.js` validates the manifest on every `npm run validate`, and cross-checks that `dev-review`/`dev-pr` still gate on `review-log-R[N].md` + `approve`/`approve-with-fixes` (not a stale convention).
+
+`scripts/task-to-pr-executor.js` is a PoC runtime for that manifest, scoped to `spec → analyze → implement`. It is a **deterministic bookkeeping tool, not an autonomous agent runner**: it detects produced markdown artifacts by file presence, tracks gate confirmations and git-diff outputs in a `docs/tasks/{taskId}/.workflow-state.json` sidecar, and writes a checkpoint block into `agent-state.md` — but it never invokes a skill or marks a gate satisfied on its own. A human (or a session acting on a human's behalf) must run `confirm-gate` explicitly after actually reviewing that gate's output.
+
+```bash
+node scripts/task-to-pr-executor.js status <taskId>          # current phase + what's blocking it
+node scripts/task-to-pr-executor.js confirm-gate <taskId> <gateName>
+node scripts/task-to-pr-executor.js mark-produced <taskId> <outputId>   # for git-diff outputs only
+node scripts/task-to-pr-executor.js checkpoint <taskId>       # write/update the agent-state.md block
+# or: npm run task-to-pr -- status <taskId>
+```
+
+Tests: `tests/workflow-manifest.test.js` (schema fixtures + fail/resume + review-round simulation) and `tests/task-to-pr-executor.test.js` (both in `npm run validate`). Not yet done: `review`/`pr` phases in the executor itself, and wiring this into `/dev-autopilot` or a real CLI entry point.
+
 ### Skill file anatomy
 
 **Claude Code (VN)** — `.claude/skills/[role-command]/SKILL.md`:

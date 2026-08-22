@@ -1,0 +1,196 @@
+{
+  "$schema": "./task-to-pr.schema.v1.json",
+  "schemaVersion": 1,
+  "id": "task-to-pr",
+  "version": "1.0.0",
+  "artifactRoot": "docs/tasks/{taskId}",
+  "runtimes": ["claude-code", "opencode", "codex-cli"],
+  "phases": [
+    {
+      "id": "spec",
+      "skill": "ba-spec",
+      "requires": ["input:task_brief", "input:acceptance_criteria"],
+      "outputs": [
+        {
+          "id": "requirements",
+          "kind": "markdown",
+          "path": "docs/tasks/{taskId}/requirements.md",
+          "required": true,
+          "versionControl": "task-branch"
+        }
+      ],
+      "gates": {
+        "before": ["task_scope_confirmed"],
+        "after": ["requirements_confirmed"]
+      },
+      "runtimeSupport": {
+        "claude-code": true,
+        "opencode": true,
+        "codex-cli": true
+      },
+      "retry": {
+        "strategy": "new-attempt-same-phase",
+        "preserveArtifacts": true,
+        "preserveAudit": true
+      },
+      "transitions": {
+        "onApprove": "analyze",
+        "onChangesRequested": "spec",
+        "onBlocked": "blocked"
+      }
+    },
+    {
+      "id": "analyze",
+      "skill": "dev-analyze",
+      "requires": ["artifact:requirements", "gate:requirements_confirmed"],
+      "outputs": [
+        {
+          "id": "analysis",
+          "kind": "markdown",
+          "path": "docs/tasks/{taskId}/analysis.md",
+          "required": true,
+          "versionControl": "task-branch"
+        }
+      ],
+      "gates": {
+        "before": ["requirements_confirmed"],
+        "after": ["analysis_confirmed"]
+      },
+      "runtimeSupport": {
+        "claude-code": true,
+        "opencode": true,
+        "codex-cli": true
+      },
+      "retry": {
+        "strategy": "new-attempt-same-phase",
+        "preserveArtifacts": true,
+        "preserveAudit": true
+      },
+      "transitions": {
+        "onApprove": "implement",
+        "onChangesRequested": "analyze",
+        "onBlocked": "blocked"
+      }
+    },
+    {
+      "id": "implement",
+      "skill": "dev-implement",
+      "requires": ["artifact:analysis", "gate:analysis_confirmed"],
+      "outputs": [
+        {
+          "id": "code_changes",
+          "kind": "git-diff",
+          "required": true,
+          "versionControl": "task-branch"
+        },
+        {
+          "id": "verification",
+          "kind": "markdown",
+          "path": "docs/tasks/{taskId}/verification.md",
+          "required": true,
+          "versionControl": "task-branch"
+        }
+      ],
+      "gates": {
+        "before": ["analysis_confirmed"],
+        "after": ["implementation_verified"]
+      },
+      "runtimeSupport": {
+        "claude-code": true,
+        "opencode": true,
+        "codex-cli": true
+      },
+      "retry": {
+        "strategy": "new-attempt-same-phase",
+        "preserveArtifacts": true,
+        "preserveAudit": true
+      },
+      "transitions": {
+        "onApprove": "review",
+        "onChangesRequested": "implement",
+        "onBlocked": "blocked"
+      }
+    },
+    {
+      "id": "review",
+      "skill": "dev-review",
+      "requires": ["artifact:code_changes", "artifact:verification", "gate:implementation_verified"],
+      "outputs": [
+        {
+          "id": "review_log",
+          "kind": "markdown",
+          "path": "docs/tasks/{taskId}/review-log-R{round}.md",
+          "required": true,
+          "versionControl": "task-branch",
+          "roundBased": true
+        }
+      ],
+      "gates": {
+        "before": ["implementation_verified"],
+        "after": ["review_verdict_ok"]
+      },
+      "runtimeSupport": {
+        "claude-code": true,
+        "opencode": true,
+        "codex-cli": true
+      },
+      "retry": {
+        "strategy": "new-attempt-same-phase",
+        "preserveArtifacts": true,
+        "preserveAudit": true
+      },
+      "transitions": {
+        "onApprove": "pr",
+        "onChangesRequested": "implement",
+        "onBlocked": "blocked"
+      }
+    },
+    {
+      "id": "pr",
+      "skill": "dev-pr",
+      "requires": [
+        "artifact:requirements",
+        "artifact:analysis",
+        "artifact:verification",
+        "artifact:review_log",
+        "gate:review_verdict_ok"
+      ],
+      "outputs": [
+        {
+          "id": "pr_description",
+          "kind": "markdown",
+          "path": "docs/tasks/{taskId}/pr-description.md",
+          "required": true,
+          "versionControl": "task-branch"
+        }
+      ],
+      "gates": {
+        "before": ["review_verdict_ok", "push_and_pr_creation_confirmed"],
+        "after": ["pr_created"]
+      },
+      "runtimeSupport": {
+        "claude-code": true,
+        "opencode": true,
+        "codex-cli": true
+      },
+      "retry": {
+        "strategy": "new-attempt-same-phase",
+        "preserveArtifacts": true,
+        "preserveAudit": true
+      },
+      "transitions": {
+        "onApprove": null,
+        "onChangesRequested": "pr",
+        "onBlocked": "blocked"
+      }
+    }
+  ],
+  "prReadiness": {
+    "requires": [
+      "artifact:verification",
+      "artifact:review_log",
+      "gate:review_verdict_ok"
+    ],
+    "acceptedReviewVerdicts": ["approve", "approve-with-fixes"]
+  }
+}
