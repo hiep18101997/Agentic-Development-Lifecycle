@@ -15,10 +15,12 @@ This repo IS the framework source. Two hand-maintained skill trees serve as cano
 - `.claude/skills/` — Claude Code **Agent Skills** (35 skills × 3 langs = 105 `SKILL*.md` files). Each skill is a flat folder `.claude/skills/<role-command>/` holding `SKILL.md` (VN) + `SKILL.en.md` + `SKILL.ja.md`. Skills **auto-trigger** from their `description` frontmatter and can also be invoked explicitly as `/role-command` (e.g. `/ba-spec`).
 - `.opencode/skills/` — OpenCode hand port (102 files) with `task()` / `question()` syntax, nested `<role>/<name>.md`, invoked as `role:command`.
 
-Cursor and Antigravity targets are **generated at install time** from these sources — no separate hand-maintained tree:
+Cursor, Antigravity, Codex CLI, and Copilot CLI targets are **generated at install time** from these sources — no separate hand-maintained tree:
 
 - **Cursor** → `bin/transformers/cursor.js` transforms `.claude/skills/*/SKILL.md` → `.cursor/rules/*.mdc` (one flat `.mdc` per skill; rewrites frontmatter to `description` + `globs: []` + `alwaysApply: false`; strips the `# Skill:` prefix; relabels `Agent(...)` blocks as `Sub-task Agent(...)`). Cursor Agent is single-agent, so multi-agent skills execute inline.
 - **Antigravity** → `bin/transformers/antigravity.js` copies `.opencode/skills/*` → `.antigravity/skills/*` (alias — OpenCode `task()`/`question()` syntax is reused since Antigravity's skill convention is not yet stable).
+- **Codex CLI** → `bin/transformers/codex.js` transforms `.claude/skills/*/SKILL.md` → `.agents/skills/*/SKILL.md` (rewrites `AskUserQuestion`/`Agent(...)`/model hints into host-neutral prose; copies referenced `agents/*.md` contracts into a `references/` subfolder).
+- **Copilot CLI** → `bin/transformers/copilot.js` targets `.github/skills/*/SKILL.md` (Copilot CLI reads the same SKILL.md standard as Codex) by delegating to `codexTransformer.copyAndTransform` with `contractLabel: 'Copilot CLI'` — no separate transform logic, since the host-neutral rewrite is identical. New; not yet smoke-tested against a live Copilot CLI session.
 
 **Language variants** (per skill / agent / template / workflow doc):
 - Claude skills: `SKILL.md` (VN, canonical), `SKILL.en.md`, `SKILL.ja.md` — all in the same skill folder.
@@ -67,6 +69,10 @@ npx agentic-development-lifecycle --yes --antigravity
 # Codex CLI (.agents/skills/ + managed AGENTS.md section)
 npx agentic-development-lifecycle --yes --codex
 
+# GitHub Copilot CLI (.github/skills/ + managed .github/copilot-instructions.md section)
+# New target — not yet smoke-tested against a live Copilot CLI session.
+npx agentic-development-lifecycle --yes --copilot
+
 # Update existing install
 npx agentic-development-lifecycle --update --yes
 
@@ -81,7 +87,7 @@ npx agentic-development-lifecycle --yes --lang vi
 npx agentic-development-lifecycle --yes --lang all
 ```
 
-Mutually-exclusive platform flags: pass only one of `--opencode`, `--cursor`, `--antigravity`, `--codex`. Default (no flag) is Claude Code. Codex defaults to `--lang vi` and requires a single language (`vi`, `en`, or `ja`).
+Mutually-exclusive platform flags: pass only one of `--opencode`, `--cursor`, `--antigravity`, `--codex`, `--copilot`. Default (no flag) is Claude Code. Codex and Copilot CLI both default to `--lang vi` and require a single language (`vi`, `en`, or `ja`) — both read the same folder-per-skill `.claude/skills/` source and fan out per language the same way.
 
 Developer Lite minimal install (Claude Code only — 8 dev/sec/arch/docs skills, no PM/BA/QA/Ops):
 
@@ -141,7 +147,7 @@ Checks per-skill: for Claude skills, each `.claude/skills/<skill>/` folder has `
 
 ### CI (GitHub Actions)
 
-- `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 5 platforms × {ubuntu, windows} on every PR, asserts the expected skills and config file are present.
+- `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 6 platforms × {ubuntu, windows} on every PR, asserts the expected skills and config file are present.
 - `.github/workflows/validate-skills.yml` — runs the validator above on every PR.
 
 ### Skill file anatomy
@@ -290,11 +296,13 @@ When adding new commands that need shell access, update `settings.json`.
 .opencode/skills/         # Hand port cho OpenCode (task() / question() syntax, role:command)
 agents/                   # Subagent definitions (spawned bởi orchestrator skills)
 bin/
-  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --codex | --lite
+  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --codex | --copilot | --lite
   CLAUDE.lite.md          # Dropped-in as CLAUDE.md when --lite is set
   transformers/
     cursor.js             # Transform .claude/skills/*/SKILL.md → .cursor/rules/*.mdc at install
     antigravity.js        # Alias .opencode/skills/ → .antigravity/skills/ at install
+    codex.js              # Transform .claude/skills/*/SKILL.md → .agents/skills/*/SKILL.md at install
+    copilot.js            # Delegates to codex.js -> .github/skills/*/SKILL.md at install
 docs/
   tasks/                  # Task docs (Type 1) — mỗi issue 1 folder, kèm audit.md
   baseline/               # Codebase reverse-engineering output (từ /ba-reverse)

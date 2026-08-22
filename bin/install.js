@@ -7,6 +7,7 @@ const path = require('path');
 const cursorTransformer = require('./transformers/cursor');
 const antigravityTransformer = require('./transformers/antigravity');
 const codexTransformer = require('./transformers/codex');
+const copilotTransformer = require('./transformers/copilot');
 
 const BANNER_CC = [
   ' ██╗   ██╗████████╗██╗    █████╗ ██████╗ ██╗      ██████╗ ',
@@ -76,6 +77,7 @@ function parsePlatform() {
   if (flags.includes('--antigravity') || flags.includes('-a')) set.push('antigravity');
   if (flags.includes('--opencode') || flags.includes('-o')) set.push('opencode');
   if (flags.includes('--codex')) set.push('codex');
+  if (flags.includes('--copilot')) set.push('copilot');
   if (set.length > 1) {
     console.error(pc.red(`Multiple platform flags set: ${set.join(', ')}. Pick only one.`));
     process.exit(1);
@@ -88,15 +90,15 @@ function parseLang() {
   const i = process.argv.findIndex((a) => a === '--lang' || a === '-l');
   if (i >= 0 && i + 1 < process.argv.length) {
     const v = process.argv[i + 1].toLowerCase();
-    if (PLATFORM_KEY === 'codex' && v === 'all') {
-      console.error(pc.red('Codex installs one language at a time. Use --lang vi, en, or ja.'));
+    if ((PLATFORM_KEY === 'codex' || PLATFORM_KEY === 'copilot') && v === 'all') {
+      console.error(pc.red(`${PLATFORM_KEY === 'codex' ? 'Codex' : 'Copilot CLI'} installs one language at a time. Use --lang vi, en, or ja.`));
       process.exit(1);
     }
     if (['ja', 'en', 'vi', 'all'].includes(v)) return v;
     console.error(pc.red(`Invalid --lang value: ${v}. Must be one of: ja, en, vi, all`));
     process.exit(1);
   }
-  return PLATFORM_KEY === 'codex' ? 'vi' : 'all';
+  return (PLATFORM_KEY === 'codex' || PLATFORM_KEY === 'copilot') ? 'vi' : 'all';
 }
 const LANG = parseLang();
 
@@ -106,6 +108,7 @@ const PLATFORM_CONFIG = {
   cursor:      { label: 'Cursor',       banner: BANNER_CURSOR, commandsDir: '.cursor/rules',      configFile: '.cursorrules' },
   antigravity: { label: 'Antigravity',  banner: BANNER_AG,     commandsDir: '.antigravity/skills', configFile: 'AGENTS.md' },
   codex:       { label: 'Codex CLI',    banner: BANNER_CC,     commandsDir: '.agents/skills',      configFile: 'AGENTS.md' },
+  copilot:     { label: 'GitHub Copilot CLI', banner: BANNER_CC, commandsDir: '.github/skills',    configFile: '.github/copilot-instructions.md' },
 };
 const CFG = PLATFORM_CONFIG[PLATFORM_KEY];
 const BANNER = CFG.banner;
@@ -302,8 +305,8 @@ async function main() {
   }
 
   log.info(`Target: ${pc.green(dst)}`);
-  log.info(`Platform: ${pc.cyan(PLATFORM)} (use ${pc.dim('--opencode | --cursor | --antigravity | --codex')} to switch)`);
-  const langHelp = PLATFORM_KEY === 'codex' ? '--lang ja|en|vi' : '--lang ja|en|vi|all';
+  log.info(`Platform: ${pc.cyan(PLATFORM)} (use ${pc.dim('--opencode | --cursor | --antigravity | --codex | --copilot')} to switch)`);
+  const langHelp = (PLATFORM_KEY === 'codex' || PLATFORM_KEY === 'copilot') ? '--lang ja|en|vi' : '--lang ja|en|vi|all';
   log.info(`Language: ${pc.cyan(LANG)} (use ${pc.dim(langHelp)} to filter)`);
   if (LITE) log.info(`Mode: ${pc.magenta('Developer Lite')} ${pc.dim('— 8 skills only')}`);
 
@@ -356,6 +359,14 @@ async function main() {
   if (PLATFORM_KEY === 'codex') {
     s.start('Transforming Claude Code skills -> Codex skills...');
     const cmdResult = codexTransformer.copyAndTransform(
+      path.join(src, '.claude', 'skills'),
+      cmdDstPath,
+      { lang: LANG, update: UPDATE, agentsDir: path.join(src, 'agents') }
+    );
+    s.stop(resultMsg(`${COMMANDS_DIR}/`, cmdResult));
+  } else if (PLATFORM_KEY === 'copilot') {
+    s.start('Transforming Claude Code skills -> Copilot CLI skills...');
+    const cmdResult = copilotTransformer.copyAndTransform(
       path.join(src, '.claude', 'skills'),
       cmdDstPath,
       { lang: LANG, update: UPDATE, agentsDir: path.join(src, 'agents') }
@@ -483,14 +494,20 @@ async function main() {
     const existing = fs.existsSync(configDst) ? fs.readFileSync(configDst, 'utf8') : '';
     fs.writeFileSync(configDst, codexTransformer.mergeManagedAgentsSection(existing));
     s.stop(`${pc.green('◆')} AGENTS.md ${pc.dim('— ADLC managed section')}`);
+  } else if (PLATFORM_KEY === 'copilot') {
+    s.start(fs.existsSync(configDst) ? 'Updating ADLC section in copilot-instructions.md...' : 'Creating .github/copilot-instructions.md...');
+    fs.mkdirSync(path.dirname(configDst), { recursive: true });
+    const existing = fs.existsSync(configDst) ? fs.readFileSync(configDst, 'utf8') : '';
+    fs.writeFileSync(configDst, copilotTransformer.mergeManagedInstructions(existing));
+    s.stop(`${pc.green('◆')} .github/copilot-instructions.md ${pc.dim('— ADLC managed section')}`);
   } else if (fs.existsSync(configDst)) {
     // NOTE: this branch used to be gated on `&& !UPDATE`, which meant an explicit --update fell
     // through to the unconditional copy below and completely replaced the user's CLAUDE.md/AGENTS.md/
     // .cursorrules with the framework's own template — destroying any customization. This file is the
     // one users are explicitly told to edit ("Customization per project" in CLAUDE.md), so it must
     // never be silently overwritten, --update or not — matching the documented installer policy
-    // ("Do not overwrite existing files — Skip and inform the user to merge manually"). codex is
-    // unaffected — it merges into a marked section above.
+    // ("Do not overwrite existing files — Skip and inform the user to merge manually"). codex/copilot are
+    // unaffected — they merge into a marked section above.
     const referenceSrc = (PLATFORM_KEY === 'opencode' || PLATFORM_KEY === 'antigravity')
       && fs.existsSync(path.join(src, 'AGENTS.md'))
       ? path.join(src, 'AGENTS.md')
@@ -535,6 +552,23 @@ async function main() {
         `   ${pc.dim('"Phân tích task này và đề xuất phương án implement"')}`,
         ``,
         `4. Skills delegate bounded subtasks when supported, then fall back to inline execution.`,
+      ].join('\n'),
+      'Next steps'
+    );
+  } else if (PLATFORM_KEY === 'copilot') {
+    note(
+      [
+        `1. Review the ADLC managed section in ${pc.cyan('.github/copilot-instructions.md')}.`,
+        `   Your existing repository instructions remain outside that section.`,
+        ``,
+        `2. Copilot CLI / Copilot coding agent discovers 35 skills from ${pc.cyan('.github/skills/')}.`,
+        `   Installed language: ${pc.cyan(LANG)}.`,
+        ``,
+        `3. Start Copilot in this repo and make a natural request such as:`,
+        `   ${pc.dim('"Phân tích task này và đề xuất phương án implement"')}`,
+        ``,
+        `4. Caveat: this target is new (added ${pc.dim('bin/transformers/copilot.js')}) and has not been`,
+        `   smoke-tested against a live Copilot CLI session — file an issue if skill discovery misbehaves.`,
       ].join('\n'),
       'Next steps'
     );

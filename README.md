@@ -22,7 +22,7 @@
 
 An **AI skill pack** for software development teams. Install it into any project to get structured, role-aware skills that cover every phase of the sprint lifecycle.
 
-Supports **Claude Code, Codex CLI, OpenCode, Cursor, and Google Antigravity** — same skill source, different runtime targets. Codex and Cursor are transformed at install time from the canonical Claude Code source.
+Supports **Claude Code, Codex CLI, GitHub Copilot CLI, OpenCode, Cursor, and Google Antigravity** — same skill source, different runtime targets. Codex, Copilot CLI, and Cursor are transformed at install time from the canonical Claude Code source. (Copilot CLI support is new and not yet smoke-tested against a live Copilot CLI session.)
 
 Works for any team that wants structured AI assistance — especially useful for outsource/consulting teams with client handoffs and multilingual deliverables.
 
@@ -61,6 +61,14 @@ npx agentic-development-lifecycle --yes --codex
 ```
 
 Generates 34 project-local Codex skills in `.agents/skills/` and adds an ADLC-managed section to `AGENTS.md` without overwriting existing project instructions. Codex installs one language at a time; `--codex` defaults to Vietnamese and also accepts `--lang en` or `--lang ja`.
+
+### GitHub Copilot CLI
+
+```bash
+npx agentic-development-lifecycle --yes --copilot
+```
+
+Generates 34 project-local skills in `.github/skills/` and adds an ADLC-managed section to `.github/copilot-instructions.md` without overwriting existing repository instructions. Same one-language-at-a-time constraint as Codex CLI (`--lang vi|en|ja`).
 
 ### OpenCode
 
@@ -322,7 +330,7 @@ Designed for consulting/outsource teams with structured client communication:
 .opencode/skills/         # 32 OpenCode skill files (hand-ported — task()/question() syntax)
 agents/                   # 8 subagent definitions (Claude Code only)
 bin/
-  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --codex
+  install.js              # Interactive installer — flags: --opencode | --cursor | --antigravity | --codex | --copilot
   transformers/
     cursor.js             # .claude/skills/*/SKILL.md → .cursor/rules/*.mdc at install time
     antigravity.js        # .opencode/skills/ → .antigravity/skills/ alias
