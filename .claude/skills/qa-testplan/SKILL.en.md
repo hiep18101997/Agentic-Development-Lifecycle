@@ -39,6 +39,8 @@ Before writing the test plan, I need to ask:
 | 4 | Regression scope — what needs retesting? | _(list features/flows to retest)_ |
 ```
 
+**Wait for confirmation.**
+
 ### Step 3 — Create Test Plan
 
 Create `docs/tasks/[TASK-ID]/test-plan.md` using template `templates/test-plan.en.md`.

@@ -34,7 +34,23 @@ Source : [SOURCE_PATH]
 Target : [TARGET_PATH]
 ```
 
-**Wait for "y" confirmation before proceeding.**
+```
+AskUserQuestion({
+  questions: [
+    {
+      question: "Confirm installing the framework from the Source into the Target above?",
+      header: "Confirm",
+      multiSelect: false,
+      options: [
+        { label: "Install", description: "Proceed to copy commands/agents/templates/workflows into Target" },
+        { label: "Cancel", description: "Stop, do not install anything" }
+      ]
+    }
+  ]
+})
+```
+
+**Wait for confirmation before proceeding.**
 
 ### Step 1 — Copy `.claude/skills/`
 

@@ -32,7 +32,7 @@ description: >
 
 ### ステップ 1 — ゲート: CR 情報収集
 
-`AskUserQuestion` tool で確認:
+`question` tool で確認:
 
 - **依頼ソース**: JP からのメール / ミーティング / Slack/Teams / 正式変更依頼書
 - **変更種別**: 新機能追加 / 既存仕様修正 / スコープ削除 / 新規パフォーマンス要件 / UI/UX 調整

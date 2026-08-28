@@ -10,7 +10,8 @@
     "install-framework": "node bin/install.js",
     "dashboard": "node bin/dashboard.js",
     "dashboard:watch": "node bin/dashboard.js --watch",
-    "validate": "node scripts/validate-skills.js"
+    "validate": "node scripts/validate-skills.js",
+    "test": "node scripts/validate-skills.js"
   },
   "dependencies": {
     "@clack/prompts": "^0.9.0",

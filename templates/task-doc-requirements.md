@@ -13,7 +13,8 @@ lang: vi
 **Ngày tạo**: [YYYY-MM-DD]  
 **BA**: [Name]  
 **Trạng thái**: Draft / Review / Approved  
-**Lane**: tiny | normal | high-risk — _(xem `docs/risk-classifier.md`)_
+**Lane**: tiny | normal | high-risk — _(xem `docs/risk-classifier.md`)_  
+**Depends on**: [Danh sách TASK-ID cách nhau bằng dấu phẩy, vd: TASK-003, TASK-007 — hoặc `None` nếu không phụ thuộc task nào]
 
 ---
 

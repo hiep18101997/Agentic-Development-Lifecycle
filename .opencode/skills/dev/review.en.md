@@ -17,6 +17,10 @@ description: >
 
 ### Step 1 — Gather context (subagent)
 
+**Independent Harness Review (opt-in):**
+
+If the team has another CLI/model configured besides the harness currently running `/dev:review` (e.g. code was implemented with Claude Code but Codex CLI, Copilot CLI, or OpenCode is also configured on the machine) — it is recommended to run that review with a **different** tool instead of the same session/model that implemented the code, to reduce "reviewing yourself" blind-spot risk. This is advisory, fully opt-in — `/dev:review` cannot invoke another vendor's CLI itself. If cross-harness review is chosen: run it manually in that other tool, then come back and record which harness performed the review in the `harness` field of `review-log.en.md` (see Step 6). If skipped, continue reviewing in the current session as usual.
+
 **Determine the base branch before spawning:**
 
 Check in this order:
@@ -81,6 +85,8 @@ Run all 4 lenses concurrently on the same diff:
 | Duplication | DRY violations — copy-pasted logic that could be extracted |
 | Performance | N+1 queries, unbounded loop, memory leak, blocking I/O |
 | Error handling | Exceptions being swallowed, error messages exposing internals |
+
+> If the task affects UI, use the `browser` tool to visually verify (screenshot/interact) before Approving — not just static code reading.
 
 #### Lens 2 — Architecture
 
@@ -208,7 +214,7 @@ question({
 
 Write `docs/tasks/[TASK-ID]/review-log-R[N].md` using template `templates/review-log.en.md` — **always write this file regardless of verdict** (Approve / Approve with minor fixes / Request Changes). `/dev:pr` reads the latest round of this file to determine whether review has happened; if it's only written on Request Changes, `/dev:pr` has no way to distinguish "never reviewed" from "approved".
 
-- Fill in Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch)
+- Fill in Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch, harness: Claude Code | Codex CLI | Copilot CLI | OpenCode | ...)
 - **Approve / Approve with minor fixes**: leave the Blocking table empty; populate Non-blocking if applicable
 - **Request Changes**: populate the Blocking table with IDs like `B-xx` — one row per issue with file:line + specific fix
 

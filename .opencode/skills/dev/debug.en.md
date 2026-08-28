@@ -52,27 +52,29 @@ question({
 
 ### Step 2 — Localize
 
-Spawn a subagent to read related code (read-only):
+Spawn a subagent to read related code (read-only), reusing `agents/code-scout.md`:
 
 task(
   description: "Find code related to reported bug",
-  prompt: "Tìm code xử lý [behavior mô tả]. Trả về file:line và flow từ entry point đến điểm có thể fail. Không sửa gì.",
+  prompt: "Find code handling the behavior described below. Return JSON per agents/code-scout.md spec — relevant_files (file:line + reason for suspicion) and entry_points (entry point to the potential failure point). Read-only, do not modify anything.\n\nTASK SUMMARY: [bug description + steps to reproduce + error message from Step 1]\nTECH STACK: [language, framework, folder structure if known]",
   subagent_type: "explorer"
 )
+
+Subagent returns `relevant_files` (file:line + reason for suspicion) and `entry_points` — use these to present below.
 
 Present results:
 
 ```
-## Tôi xác định vùng code có thể là nguồn lỗi:
+## I identified the code areas that could be the source of the bug:
 
-1. [file:line] — [lý do suspect]
-2. [file:line] — [lý do suspect]
+1. [file:line] — [reason for suspicion]
+2. [file:line] — [reason for suspicion]
 
 Hypothesis:
-- H1: [Giả thuyết 1 về nguyên nhân]
-- H2: [Giả thuyết 2]
+- H1: [Hypothesis 1 about the cause]
+- H2: [Hypothesis 2]
 
-Tôi sẽ kiểm tra H1 trước vì [lý do].
+I will check H1 first because [reason].
 ```
 
 Use the `question` tool:
@@ -95,10 +97,10 @@ Create a minimal reproduction — the smallest code that can trigger the bug.
 ```
 ## Minimal reproduction:
 
-[Code snippet hoặc steps tối thiểu]
+[Code snippet or minimal steps]
 
-Lỗi có reproduce với code này không?
-(Nếu không → vấn đề nằm ở interaction với phần khác, không phải đây)
+Does the bug reproduce with this code?
+(If not → the issue lies in interaction with another part, not this one)
 ```
 
 **Do not proceed without a minimal reproduction.**
@@ -117,12 +119,15 @@ question({
     ]
   }]
 })
+**Wait for confirmation.**
 
 **Ask First Gate**: If the fix involves any sensitive changes (`assets/ask-first-gates.md`) → requires senior review before applying.
 
 ### Step 5 — Guard
 
 After applying the fix, use the `question` tool:
+
+**Mandatory**: Re-run the exact minimal reproduction case captured in Step 3, and confirm the original failure no longer occurs. The bug MUST NOT be considered closed until it has been re-verified with this minimal reproduction.
 
 question({
   questions: [{
@@ -132,8 +137,9 @@ question({
       { label: "Not needed", description: "Fix is sufficient" },
       { label: "Add tests", description: "Add regression tests" },
     ]
-  }])
-}
+  }]
+})
+**Wait for confirmation.**
 
 ---
 

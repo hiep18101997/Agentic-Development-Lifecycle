@@ -15,7 +15,8 @@ lang: ja
 **作成日**: [YYYY-MM-DD]  
 **担当BA**: [Name]  
 **ステータス**: 下書き / レビュー中 / 承認済み  
-**リスク区分**: tiny | normal | high-risk — _(参照: `docs/risk-classifier.ja.md`)_
+**リスク区分**: tiny | normal | high-risk — _(参照: `docs/risk-classifier.ja.md`)_  
+**依存タスク (Depends on)**: [カンマ区切りのTASK-IDリスト、例: TASK-003, TASK-007 — 依存なしの場合は `None`]
 
 ---
 

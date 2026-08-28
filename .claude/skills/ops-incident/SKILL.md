@@ -77,3 +77,5 @@ Câu hỏi quan trọng:
 | 3 | Có contributing factor nào bị bỏ sót không? | A: Không / B: Có — factor: ___ / C: Khác: ___ |
 | 4 | Ai cần review RCA này trước khi share rộng? | _(điền tên)_ |
 ```
+
+**Chờ confirm.**

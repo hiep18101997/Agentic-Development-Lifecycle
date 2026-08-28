@@ -39,6 +39,8 @@ Trước khi soạn test plan, tôi cần hỏi:
 | 4 | Regression scope — những gì cần retest? | _(liệt kê features/flows cần retest)_ |
 ```
 
+**Chờ confirm.**
+
 ### Bước 3 — Tạo Test Plan
 
 Tạo `docs/tasks/[TASK-ID]/test-plan.md` sử dụng template `templates/test-plan.md`.

@@ -104,9 +104,9 @@ Với mỗi file update đề xuất:
 | 1 | Nội dung mới có chính xác không? | A: Chính xác / B: Sai — sửa: ___ / C: Khác: ___ |
 | 2 | Có thông tin nào khác cần update mà tôi bỏ sót? | A: Không / B: Có — thêm: ___ / C: Khác: ___ |
 | 3 | Ngôn ngữ mô tả có đủ rõ không? | A: Rõ rồi / B: Cần rõ hơn — chỗ nào: ___ / C: Khác: ___ |
-
-Confirm để tôi apply thay đổi.
 ```
+
+**Chờ confirm trước khi ghi file.**
 
 ### Bước 5 — Sau khi apply
 

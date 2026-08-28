@@ -36,6 +36,8 @@ Trước khi bắt đầu, cho tôi biết:
 | 3 | Đã có ADR nào liên quan chưa? | A: Có — link: ___ / B: Không / C: Khác: ___ |
 ```
 
+**Chờ confirm.**
+
 ### Bước 3 — Phân tích và Review
 
 Đánh giá theo các lens:

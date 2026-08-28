@@ -32,6 +32,8 @@ Mô tả cho tôi nghe: vấn đề bạn đang muốn giải quyết là gì?
 
 ### Bước 2 — Diverge: Tạo 5-8 variations
 
+**Research trước khi tạo variations**: Dùng `web_search` (nếu không có công cụ search, hỏi user qua `question()`) kiểm tra đã có sản phẩm/pattern nào giải quyết vấn đề tương tự chưa. Fold finding liên quan vào các variation bên dưới — tránh generate ý tưởng trong vacuum, bỏ qua prior art.
+
 Phân tích ý tưởng qua các lens:
 
 - **Inversion**: Nếu làm ngược lại thì sao?

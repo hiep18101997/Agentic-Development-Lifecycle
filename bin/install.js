@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { intro, outro, confirm, spinner, log, cancel, isCancel, note } = require('@clack/prompts');
+const { intro, outro, confirm, select, spinner, log, cancel, isCancel, note } = require('@clack/prompts');
 const pc = require('picocolors');
 const fs = require('fs');
 const path = require('path');
@@ -57,7 +57,7 @@ const src = path.resolve(__dirname, '..');
 const dst = process.cwd();
 const YES = process.argv.includes('--yes') || process.argv.includes('-y');
 const UPDATE = process.argv.includes('--update') || process.argv.includes('-u');
-const LITE = process.argv.includes('--lite');
+let LITE = process.argv.includes('--lite');
 
 // Developer Lite: 8 skills only. Names match the skill folder under .claude/skills/.
 const LITE_SKILLS = new Set([
@@ -84,7 +84,7 @@ function parsePlatform() {
   }
   return set[0] || 'claude';
 }
-const PLATFORM_KEY = parsePlatform();
+let PLATFORM_KEY = parsePlatform();
 
 function parseLang() {
   const i = process.argv.findIndex((a) => a === '--lang' || a === '-l');
@@ -100,7 +100,7 @@ function parseLang() {
   }
   return (PLATFORM_KEY === 'codex' || PLATFORM_KEY === 'copilot') ? 'vi' : 'all';
 }
-const LANG = parseLang();
+let LANG = parseLang();
 
 const PLATFORM_CONFIG = {
   claude:      { label: 'Claude Code',  banner: BANNER_CC,     commandsDir: '.claude/skills',     configFile: 'CLAUDE.md' },
@@ -110,11 +110,11 @@ const PLATFORM_CONFIG = {
   codex:       { label: 'Codex CLI',    banner: BANNER_CC,     commandsDir: '.agents/skills',      configFile: 'AGENTS.md' },
   copilot:     { label: 'GitHub Copilot CLI', banner: BANNER_CC, commandsDir: '.github/skills',    configFile: '.github/copilot-instructions.md' },
 };
-const CFG = PLATFORM_CONFIG[PLATFORM_KEY];
-const BANNER = CFG.banner;
-const PLATFORM = CFG.label;
-const COMMANDS_DIR = CFG.commandsDir;
-const CONFIG_FILE = CFG.configFile;
+let CFG = PLATFORM_CONFIG[PLATFORM_KEY];
+let BANNER = CFG.banner;
+let PLATFORM = CFG.label;
+let COMMANDS_DIR = CFG.commandsDir;
+let CONFIG_FILE = CFG.configFile;
 
 // When installing a single language, strip the lang suffix from the destination filename.
 // e.g. --lang en: "spec.en.md" → "spec.md"  |  --lang ja: "spec.ja.md" → "spec.md"
@@ -286,7 +286,84 @@ function resultMsg(label, { copied, skipped, updated, filtered = 0 }) {
   return `${icon} ${label}${parts.length ? pc.dim(` — ${parts.join(', ')}`) : ''}`;
 }
 
+// Interactive picker (IB-048 / G-19): when the user runs the installer with zero platform flags
+// and without --yes, ask for platform + language instead of silently defaulting to Claude Code +
+// all languages. Any explicit platform flag (--opencode/--cursor/--antigravity/--codex/--copilot)
+// or --yes bypasses this entirely — CI/scripted installs keep today's exact non-interactive path.
+async function pickInteractive() {
+  const platformAnswer = await select({
+    message: 'Chọn nền tảng muốn cài Agentic Development Lifecycle:',
+    initialValue: LITE ? 'lite' : 'claude',
+    options: [
+      { value: 'claude', label: 'Claude Code', hint: 'mặc định' },
+      { value: 'opencode', label: 'OpenCode' },
+      { value: 'cursor', label: 'Cursor' },
+      { value: 'antigravity', label: 'Antigravity' },
+      { value: 'codex', label: 'Codex CLI' },
+      { value: 'copilot', label: 'GitHub Copilot CLI' },
+      { value: 'lite', label: 'Developer Lite', hint: 'Claude Code — 8 skill' },
+    ],
+  });
+  if (isCancel(platformAnswer)) {
+    cancel('Cài đặt đã huỷ.');
+    process.exit(0);
+  }
+
+  const platformKey = platformAnswer === 'lite' ? 'claude' : platformAnswer;
+  const lite = platformAnswer === 'lite';
+
+  const singleLangOnly = platformKey === 'codex' || platformKey === 'copilot';
+  const langOptions = singleLangOnly
+    ? [
+        { value: 'vi', label: 'Tiếng Việt' },
+        { value: 'en', label: 'English' },
+        { value: 'ja', label: '日本語' },
+      ]
+    : [
+        { value: 'all', label: 'Tất cả (vi + en + ja)', hint: 'mặc định' },
+        { value: 'vi', label: 'Tiếng Việt' },
+        { value: 'en', label: 'English' },
+        { value: 'ja', label: '日本語' },
+      ];
+  const langInitial = langOptions.some((o) => o.value === LANG) ? LANG : langOptions[0].value;
+  const langAnswer = await select({
+    message: 'Chọn ngôn ngữ cài đặt:',
+    initialValue: langInitial,
+    options: langOptions,
+  });
+  if (isCancel(langAnswer)) {
+    cancel('Cài đặt đã huỷ.');
+    process.exit(0);
+  }
+
+  return { platformKey, lite, lang: langAnswer };
+}
+
 async function main() {
+  // No platform flag AND no --yes AND a real interactive TTY → offer the picker.
+  // Any explicit platform/lite/lang flag, --yes (CI/scripted), or a non-TTY stdin/stdout
+  // (piped, redirected, non-interactive shell) preserves today's silent-default behavior
+  // byte-for-byte — a picker can never block a script or CI job waiting on input that will
+  // never arrive.
+  const hasPlatformFlag = process.argv.includes('--cursor') || process.argv.includes('-c')
+    || process.argv.includes('--antigravity') || process.argv.includes('-a')
+    || process.argv.includes('--opencode') || process.argv.includes('-o')
+    || process.argv.includes('--codex') || process.argv.includes('--copilot')
+    || process.argv.includes('--lite') || process.argv.includes('--lang') || process.argv.includes('-l');
+  const isInteractiveTty = Boolean(process.stdin.isTTY) && Boolean(process.stdout.isTTY);
+  if (!hasPlatformFlag && !YES && isInteractiveTty) {
+    const picked = await pickInteractive();
+    PLATFORM_KEY = picked.platformKey;
+    LITE = picked.lite;
+    LANG = picked.lang;
+    CFG = PLATFORM_CONFIG[PLATFORM_KEY];
+    BANNER = CFG.banner;
+    PLATFORM = CFG.label;
+    COMMANDS_DIR = CFG.commandsDir;
+    CONFIG_FILE = CFG.configFile;
+    console.log();
+  }
+
   console.log(pc.cyan(BANNER));
   console.log();
 
@@ -302,6 +379,17 @@ async function main() {
   if (src === dst) {
     cancel('Source and target are the same directory.');
     process.exit(1);
+  }
+
+  // IB-032: --update (even with --yes) must never silently write into a directory that
+  // doesn't already look like an ADLC install — an update-into-empty-dir is almost always
+  // a mistake, not something to allow non-interactively. Checked regardless of --yes.
+  if (UPDATE) {
+    const looksLikeInstall = fs.existsSync(path.join(dst, 'CLAUDE.md')) || fs.existsSync(path.join(dst, COMMANDS_DIR));
+    if (!looksLikeInstall) {
+      cancel(`--update specified but ${dst} doesn't look like an existing ADLC install (no CLAUDE.md or skill directory found) — remove --update to do a fresh install, or verify the target path is correct`);
+      process.exit(1);
+    }
   }
 
   log.info(`Target: ${pc.green(dst)}`);

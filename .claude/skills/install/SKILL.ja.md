@@ -37,7 +37,23 @@ Target : [TARGET_PATH]
 Language: all (デフォルト) | ja | en | vi
 ```
 
-**続行確認 "y" を待つ。**
+```
+AskUserQuestion({
+  questions: [
+    {
+      question: "上記の Source から Target へフレームワークをインストールしてよいですか?",
+      header: "確認",
+      multiSelect: false,
+      options: [
+        { label: "インストール", description: "commands/agents/templates/workflows を Target にコピーして続行" },
+        { label: "キャンセル", description: "中止し、何もインストールしない" }
+      ]
+    }
+  ]
+})
+```
+
+**続行前に確認を待つ。**
 
 ### ステップ 1 — `.claude/skills/` コピー
 

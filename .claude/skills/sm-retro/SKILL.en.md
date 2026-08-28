@@ -29,6 +29,8 @@ Before we start:
 | 4 | Are there any unfinished action items from the previous retro? | A: No / B: Yes — [N] items not done / C: Other: ___ |
 ```
 
+**Wait for confirmation.**
+
 ### Step 2 — Synthesize feedback
 
 Receive input from the team (paste anonymous feedback or session notes).
@@ -114,3 +116,5 @@ Important questions:
 | 3 | Is there an important theme that was miscategorized and needs splitting? | A: No / B: Yes — theme: ___ / C: Other: ___ |
 | 4 | Old unfinished action items — should we escalate or drop? | A: Escalate / B: Drop / C: Carry over one more sprint / D: Other: ___ |
 ```
+
+**Wait for confirmation.**

@@ -52,13 +52,15 @@ question({
 
 ### Bước 2 — Localize
 
-Spawn subagent để đọc code liên quan (read-only):
+Spawn subagent để đọc code liên quan (read-only), dùng lại `agents/code-scout.md`:
 
 task(
   description: "Find code related to reported bug",
-  prompt: "Tìm code xử lý [behavior mô tả]. Trả về file:line và flow từ entry point đến điểm có thể fail. Không sửa gì.",
+  prompt: "Tìm code xử lý hành vi mô tả bên dưới. Trả về JSON theo agents/code-scout.md spec — relevant_files (file:line + lý do suspect) và entry_points (entry point đến điểm có thể fail). Chỉ đọc, không sửa gì.\n\nTASK SUMMARY: [mô tả lỗi + steps to reproduce + error message từ Bước 1]\nTECH STACK: [language, framework, folder structure nếu biết]",
   subagent_type: "explorer"
 )
+
+Subagent trả về `relevant_files` (file:line + lý do suspect) và `entry_points` — dùng để trình bày bên dưới.
 
 Trình bày:
 
@@ -117,12 +119,15 @@ question({
     ]
   }]
 })
+**Chờ confirm.**
 
 **Ask First Gate**: Nếu fix liên quan đến bất kỳ thay đổi nhạy cảm nào (`assets/ask-first-gates.md`) → cần senior review trước khi apply.
 
 ### Bước 5 — Guard
 
 Sau khi fix, dùng `question` tool:
+
+**Bắt buộc**: Re-chạy đúng minimal reproduction case đã capture ở Bước 3, xác nhận lỗi gốc không còn reproduce được. Không được coi bug là đã đóng nếu chưa re-verify lại bằng minimal reproduction này.
 
 question({
   questions: [{
@@ -134,6 +139,7 @@ question({
     ]
   }]
 })
+**Chờ confirm.**
 
 ---
 

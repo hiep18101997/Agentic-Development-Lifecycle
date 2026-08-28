@@ -55,3 +55,7 @@ Questions before finalizing:
 
 After confirmation, I will update the status to "Accepted".
 ```
+
+Once the ADR moves to "Accepted", suggest running `node bin/generate-project-context.js` to refresh the auto-generated `docs/project-context.md` digest (never hand-edit that file).
+
+**Wait for confirmation.**

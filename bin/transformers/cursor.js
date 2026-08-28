@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 function transformContent(source) {
-  let body = source;
+  let body = source.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
 
   body = transformFrontmatter(body);
 

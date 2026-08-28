@@ -28,7 +28,7 @@ description: >
 
 ### ステップ 1 — ゲート: 作業内容の特定
 
-`AskUserQuestion` tool で確認:
+`question` tool で確認:
 
 - **作業種別**:
   - 新規用語追加（先ほどの `be:bridge` セッションから）

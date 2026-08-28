@@ -11,8 +11,12 @@
       "Bash(git status*)"
     ],
     "deny": [
+      "Bash(git push*)",
       "Bash(git reset --hard*)",
-      "Bash(rm -rf*)"
+      "Bash(rm -rf*)",
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "Bash(nc*)"
     ]
   }
 }

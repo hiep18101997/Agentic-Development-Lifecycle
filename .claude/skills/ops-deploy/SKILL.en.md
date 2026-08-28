@@ -137,4 +137,6 @@ Before starting the deployment:
 | 3 | Are there any dependency services that haven't been notified? | A: All notified / B: Still need to notify: ___ / C: Other: ___ |
 ```
 
+**Wait for confirmation.**
+
 **Do not deploy until all questions above have been answered.**

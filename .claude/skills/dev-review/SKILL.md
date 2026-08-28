@@ -17,6 +17,10 @@ description: >
 
 ### Bước 1 — Thu thập context (subagent)
 
+**Independent Harness Review (opt-in):**
+
+Nếu team có sẵn CLI/model khác ngoài harness đang chạy `/dev-review` này (ví dụ: code được implement bằng Claude Code nhưng máy có sẵn Codex CLI, Copilot CLI, hoặc OpenCode đã cấu hình) — khuyến nghị chạy review đó bằng công cụ **khác** thay vì cùng session/model đã implement, để giảm rủi ro "tự review chính mình" (reviewer blind-spot). Đây là gợi ý advisory, hoàn toàn opt-in — `/dev-review` không thể tự gọi CLI của vendor khác. Nếu chọn chạy cross-harness: thực hiện thủ công ở công cụ đó, sau đó quay lại ghi rõ harness nào đã review vào field `harness` của `review-log.md` (xem Bước 6). Nếu bỏ qua, tiếp tục review trong session hiện tại như bình thường.
+
 **Kiểm tra review round trước (nếu có):**
 
 Tìm `docs/tasks/[TASK-ID]/review-log-R*.md`. Nếu tồn tại:
@@ -79,6 +83,8 @@ Chạy 4 lens đồng thời trên cùng diff:
 | Duplication | Vi phạm DRY — copy-paste logic có thể extract |
 | Performance | N+1 query, unbounded loop, memory leak, blocking I/O |
 | Error handling | Exception bị nuốt, error message expose internals |
+
+> Nếu task ảnh hưởng UI, dùng `browser` tool để verify trực quan (screenshot/tương tác) trước khi Approve — không chỉ đọc code tĩnh.
 
 #### Lens 2 — Architecture
 
@@ -200,7 +206,7 @@ Dùng `AskUserQuestion` tool:
 
 Ghi `docs/tasks/[TASK-ID]/review-log-R[N].md` dùng template `templates/review-log.md` — **LUÔN ghi file này bất kể verdict nào** (Approve / Approve with minor fixes / Request Changes). `/dev-pr` đọc round gần nhất của file này để xác định đã review chưa; nếu chỉ ghi khi Request Changes, `/dev-pr` không có cách nào phân biệt "chưa review" với "đã approve".
 
-- Điền đầy đủ Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch)
+- Điền đầy đủ Meta (task_id, round, verdict: `approve` | `approve-with-fixes` | `request-changes`, timestamp JST, base_branch, harness: Claude Code | Codex CLI | Copilot CLI | OpenCode | ...)
 - **Approve / Approve with minor fixes**: bảng Blocking để trống (không row nào); populate Non-blocking nếu Lens phát hiện gì
 - **Request Changes**: populate bảng Blocking với ID dạng `B-xx` — mỗi issue 1 row có file:line + fix cụ thể; populate Ask First nếu có
 

@@ -32,6 +32,8 @@ Describe what problem you're trying to solve?
 
 ### Step 2 — Diverge: Generate 5-8 variations
 
+**Research before generating variations**: Use `web_search` (or ask the user via `question()` if no search tool is available) to check whether a similar product/pattern already solves this problem. Fold any relevant findings into the variations below — avoid generating ideas in a vacuum, ignoring prior art.
+
 Analyze the idea through these lenses:
 
 - **Inversion**: What if we did the opposite?

@@ -7,6 +7,7 @@
 | task_id | TASK-XXX |
 | round | 1 |
 | reviewer | AI / Human |
+| harness | Claude Code (Sonnet) \| Codex CLI \| Copilot CLI \| OpenCode \| ... |
 | verdict | request-changes \| approve \| approve-with-fixes |
 | timestamp_jst | 2026-01-01T10:00:00+09:00 |
 | base_branch | main |

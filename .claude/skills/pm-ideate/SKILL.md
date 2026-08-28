@@ -32,6 +32,8 @@ Mô tả cho tôi nghe: vấn đề bạn đang muốn giải quyết là gì?
 
 ### Bước 2 — Diverge: Tạo 5-8 variations
 
+**Research trước khi tạo variations**: Dùng `web_search` (nếu không có công cụ search, hỏi user) kiểm tra đã có sản phẩm/pattern nào giải quyết vấn đề tương tự chưa. Fold finding liên quan vào các variation bên dưới — tránh generate ý tưởng trong vacuum, bỏ qua prior art.
+
 Phân tích ý tưởng qua các lens:
 
 - **Inversion**: Nếu làm ngược lại thì sao?
@@ -75,13 +77,45 @@ Cluster các variations thành 2-3 strategic directions:
 - [Điều 1 không làm trong scope này]
 - [Điều 2 không làm]
 - [Điều 3 không làm]
-
-| # | Câu hỏi | Lựa chọn |
-|---|---------|---------|
-| 1 | "Not Doing list" có đúng không? | A: Đúng / B: Có gì vẫn trong scope — mục: ___ / C: Khác: ___ |
-| 2 | Success metric có measurable không? | A: Có / B: Chưa đủ — sửa thành: ___ / C: Khác: ___ |
-| 3 | Sẵn sàng chạy /ba-spec với hướng này chưa? | A: Sẵn sàng / B: Cần explore thêm — hướng: ___ / C: Khác: ___ |
 ```
+
+### Bước 5 — Gate cuối: Xác nhận hướng đi
+
+```
+AskUserQuestion({
+  questions: [
+    {
+      question: "\"Not Doing list\" có đúng không?",
+      header: "Not Doing",
+      multiSelect: false,
+      options: [
+        { label: "Đúng", description: "Not Doing list đã chính xác" },
+        { label: "Còn trong scope", description: "Có mục vẫn đang trong scope — cần điều chỉnh" }
+      ]
+    },
+    {
+      question: "Success metric có measurable không?",
+      header: "Metric",
+      multiSelect: false,
+      options: [
+        { label: "Có", description: "Success metric measurable được" },
+        { label: "Chưa đủ", description: "Cần sửa success metric cho rõ ràng hơn" }
+      ]
+    },
+    {
+      question: "Sẵn sàng chạy /ba-spec với hướng này chưa?",
+      header: "Next step",
+      multiSelect: false,
+      options: [
+        { label: "Sẵn sàng", description: "Chạy /ba-spec để viết spec chi tiết" },
+        { label: "Cần explore thêm", description: "Cần explore thêm hướng khác trước khi spec" }
+      ]
+    }
+  ]
+})
+```
+
+**Chờ confirm.**
 
 ---
 

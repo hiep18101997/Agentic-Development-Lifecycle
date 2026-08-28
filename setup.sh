@@ -9,6 +9,7 @@
 set -e
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_URL="https://github.com/hiepdnh/Agentic-Development-Lifecycle"
 
 # Parse flags + positional target path
 UPDATE=false
@@ -78,10 +79,20 @@ if [ "$SOURCE_DIR" = "$TARGET_DIR" ]; then
     exit 1
 fi
 
+# IB-032: --update (even with --yes) must never silently write into a directory that doesn't
+# already look like an ADLC install — an update-into-empty-dir is almost always a mistake, not
+# something to allow non-interactively. Checked regardless of --yes.
+if $UPDATE; then
+    if [ ! -f "$TARGET_DIR/CLAUDE.md" ] && [ ! -d "$TARGET_DIR/.claude/skills" ]; then
+        echo "ERROR: --update specified but $TARGET_DIR doesn't look like an existing ADLC install (no CLAUDE.md or skill directory found) — remove --update to do a fresh install, or verify the target path is correct"
+        exit 1
+    fi
+fi
+
 if ! $YES; then
     verb=$($UPDATE && echo Update || echo Install)
     read -p "$verb framework into '$TARGET_DIR'? [y/N] " confirm
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    if [[ ! "$confirm" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
         echo "Cancelled."
         exit 0
     fi
@@ -225,4 +236,4 @@ echo ""
 echo "  3. Type / to see available commands:"
 echo "       /pm:ideate   /ba:spec   /dev:analyze   /qa:testplan ..."
 echo ""
-echo "  Docs: https://github.com/hiepdnh/Agentic-Development-Lifecycle"
+echo "  Docs: $REPO_URL"

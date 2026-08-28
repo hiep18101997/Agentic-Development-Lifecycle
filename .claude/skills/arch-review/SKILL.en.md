@@ -36,6 +36,8 @@ Before I start, tell me:
 | 3 | Are there any related ADRs? | A: Yes — link: ___ / B: No / C: Other: ___ |
 ```
 
+**Wait for confirmation.**
+
 ### Step 3 — Analyze and Review
 
 Evaluate across these lenses:

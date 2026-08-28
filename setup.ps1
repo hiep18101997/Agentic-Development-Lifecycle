@@ -29,6 +29,7 @@ function Test-LangFilter {
 
 $SourcePath = $PSScriptRoot
 $ErrorActionPreference = "Stop"
+$RepoUrl = "https://github.com/hiepdnh/Agentic-Development-Lifecycle"
 
 $mode = if ($Update) { "Update" } else { "Setup" }
 
@@ -51,11 +52,23 @@ if ($SourcePath -eq $TargetPath) {
     exit 1
 }
 
+# IB-032: -Update (even with -Yes) must never silently write into a directory that doesn't
+# already look like an ADLC install — an update-into-empty-dir is almost always a mistake, not
+# something to allow non-interactively. Checked regardless of -Yes.
+if ($Update) {
+    $claudeMdCheck = Join-Path $TargetPath "CLAUDE.md"
+    $skillsCheck = Join-Path $TargetPath ".claude\skills"
+    if (-not (Test-Path $claudeMdCheck) -and -not (Test-Path $skillsCheck)) {
+        Write-Host "ERROR: -Update specified but $TargetPath doesn't look like an existing ADLC install (no CLAUDE.md or skill directory found) — remove -Update to do a fresh install, or verify the target path is correct" -ForegroundColor Red
+        exit 1
+    }
+}
+
 # Confirm
 if (-not $Yes) {
     $verb = if ($Update) { "Update" } else { "Install" }
     $confirm = Read-Host "$verb framework into '$TargetPath'? [y/N]"
-    if ($confirm -notmatch '^[Yy]$') {
+    if ($confirm -notmatch '^(y|yes)$') {
         Write-Host "Cancelled." -ForegroundColor Yellow
         exit 0
     }
@@ -208,4 +221,4 @@ Write-Host ""
 Write-Host "  3. Type / to see available commands:"
 Write-Host "       /pm:ideate   /ba:spec   /dev:analyze   /qa:testplan ..."
 Write-Host ""
-Write-Host "  Docs: https://github.com/hiepdnh/Agentic-Development-Lifecycle"
+Write-Host "  Docs: $RepoUrl"

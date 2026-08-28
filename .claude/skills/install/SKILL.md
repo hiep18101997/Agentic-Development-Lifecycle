@@ -34,7 +34,23 @@ Source : [SOURCE_PATH]
 Target : [TARGET_PATH]
 ```
 
-**Chờ confirm "y" trước khi tiếp tục.**
+```
+AskUserQuestion({
+  questions: [
+    {
+      question: "Xác nhận cài đặt framework từ Source vào Target ở trên?",
+      header: "Confirm",
+      multiSelect: false,
+      options: [
+        { label: "Cài đặt", description: "Tiếp tục copy commands/agents/templates/workflows vào Target" },
+        { label: "Hủy", description: "Dừng lại, không cài đặt gì" }
+      ]
+    }
+  ]
+})
+```
+
+**Chờ confirm trước khi tiếp tục.**
 
 ### Bước 1 — Copy `.claude/skills/`
 

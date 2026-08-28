@@ -314,6 +314,35 @@ function renderKanban() {
   }).join('');
 }
 
+// ── Blocked / Ready (dependency visibility, display-only) ───
+
+function renderDependencies() {
+  const tasks = DATA.tasks;
+  const blocked = tasks.filter(t => t.blocked);
+  const ready   = tasks.filter(t => !t.blocked);
+
+  const blockedHtml = blocked.length ? blocked.map(t => `
+    <div class="t-entry" style="align-items:flex-start">
+      <span class="t-icon">⛔</span>
+      <span class="t-text" style="white-space:normal">
+        <strong>${esc(t.id)}</strong> ${phasePill(t.phase)}<br>
+        <small>Blocked by: ${t.blockers.map(b => `${esc(b.id)} (${esc(b.reason)})`).join(', ')}</small>
+      </span>
+    </div>`).join('') : '<div style="font-size:12px;color:var(--fg-muted)">No blocked tasks</div>';
+
+  const readyHtml = ready.length ? ready.map(t => `
+    <div class="t-entry" style="align-items:flex-start">
+      <span class="t-icon">✅</span>
+      <span class="t-text" style="white-space:normal">
+        <strong>${esc(t.id)}</strong> ${phasePill(t.phase)}<br>
+        <small>${t.dependsOn.length ? 'Deps satisfied: ' + esc(t.dependsOn.join(', ')) : 'No dependencies declared'}</small>
+      </span>
+    </div>`).join('') : '<div style="font-size:12px;color:var(--fg-muted)">No tasks tracked</div>';
+
+  document.getElementById('blocked-list').innerHTML = blockedHtml;
+  document.getElementById('ready-list').innerHTML = readyHtml;
+}
+
 // ── Activity timeline ───────────────────────────────────────
 
 function renderTimeline() {
@@ -400,11 +429,29 @@ function renderHeatmap() {
     const alpha = 0.12 + intensity * 0.88;
     const bg = `rgba(37,99,235,${alpha.toFixed(2)})`;
     const fg = intensity > 0.5 ? '#fff' : 'var(--fg)';
+    const durLabel = s.avgDurationMin != null ? ` · ~${s.avgDurationMin}m avg (${s.durationSamples} samples)` : '';
     return `<div class="hm-cell" style="background:${bg};color:${fg}"
-      title="${esc(s.name)} (${s.usageCount} uses)">
+      title="${esc(s.name)} (${s.usageCount} uses)${esc(durLabel)}">
       <span>${esc(s.name.split(':')[1] || s.name)}</span>
     </div>`;
   }).join('');
+}
+
+// ── Skill benchmark (self-reported duration overhead per skill) ──
+// Populated only from audit.md entries that include an optional "**duration**: <N>m" field
+// (see templates/audit.md field docs). Purely informational — no field means no data yet.
+
+function renderBenchmark() {
+  const el = document.getElementById('skill-benchmark');
+  if (!el) return;
+  const { skills } = DATA;
+  const withData = skills.filter(s => s.avgDurationMin != null).sort((a, b) => b.usageCount - a.usageCount).slice(0, 8);
+  if (!withData.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--fg-muted)">Chưa có duration data — agent tự ghi <code>**duration**: Xm</code> vào audit.md entry để bật benchmark.</div>';
+    return;
+  }
+  el.innerHTML = withData.map(s => `<div class="t-entry"><span class="t-text">${esc(s.name)}</span>
+    <span style="color:var(--fg-muted);font-size:11px">~${s.avgDurationMin}m avg · ${s.durationSamples} samples · ${s.usageCount} uses</span></div>`).join('');
 }
 
 // ── Health table ────────────────────────────────────────────
@@ -518,8 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTimeline();
   renderDoughnut();
   renderHeatmap();
+  renderBenchmark();
   renderHealth();
   renderBacklog();
+  renderDependencies();
   initSortable();
   initGlobalSearch();
 
@@ -609,6 +658,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="rail-title">Skill Usage</div>
         <div class="heatmap" id="skill-heatmap"></div>
         <div style="font-size:11px;color:var(--fg-muted);margin-top:8px">Darker = more audit entries</div>
+        <div class="rail-title" style="margin-top:14px">Skill Benchmark</div>
+        <div id="skill-benchmark"></div>
       </div>
 
       <!-- Growth counters -->
@@ -664,6 +715,21 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr></thead>
         <tbody></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Blocked / Ready (dependency visibility) -->
+  <div class="section">
+    <div class="section-title">Blocked / Ready</div>
+    <div class="main-grid" style="grid-template-columns: 1fr 1fr">
+      <div class="rail-card">
+        <div class="rail-title">Blocked</div>
+        <div class="timeline" id="blocked-list"></div>
+      </div>
+      <div class="rail-card">
+        <div class="rail-title">Ready</div>
+        <div class="timeline" id="ready-list"></div>
+      </div>
     </div>
   </div>
 
