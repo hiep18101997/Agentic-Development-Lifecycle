@@ -60,3 +60,5 @@ Before submitting:
 | 2 | Is severity [X] correct? | A: Correct / B: Higher — raise to: ___ / C: Lower — lower to: ___ / D: Other: ___ |
 | 3 | Should anyone else be tagged? | A: No / B: Yes — username: ___ / C: Other: ___ |
 ```
+
+**Wait for confirmation.**

@@ -60,3 +60,5 @@ Trước khi submit:
 | 2 | Severity [X] có đúng không? | A: Đúng / B: Cao hơn — lên: ___ / C: Thấp hơn — xuống: ___ / D: Khác: ___ |
 | 3 | Cần tag thêm người nào không? | A: Không / B: Có — username: ___ / C: Khác: ___ |
 ```
+
+**Chờ confirm.**

@@ -28,6 +28,8 @@ Cursor, Antigravity, Codex CLI, and Copilot CLI targets are **generated at insta
 
 When adding a new skill, create the folder `.claude/skills/<role-command>/` with all 3 `SKILL*.md` variants. Translation flows from VN → EN → JA; keep frontmatter `name:` identical across variants (must equal the folder name). JP variants reference `assets/ask-first-gates.ja.md`, `docs/risk-classifier.ja.md`, and use JP business terminology from `templates/jp-vn-en-glossary.md`.
 
+**JA-variant convention exception**: most skills' `SKILL.ja.md` is a short pointer-style summary (role/purpose + link to the EN/VN canonical file). Six skills are an intentional exception and carry a FULL inline JA translation instead — `dev-analyze`, `pm-maintain`, `install`, `be-changerequest`, `be-glossary`, `be-bridge` (+ their `.opencode/skills/` mirrors where applicable). These are the JP-client-facing/terminology-heavy skills where a JP engineer or bridge engineer needs to read the entire workflow without switching files. Do not "fix" these to pointer-style — this is deliberate, not drift.
+
 ### Run installer locally
 
 ```bash
@@ -149,6 +151,7 @@ Checks per-skill: for Claude skills, each `.claude/skills/<skill>/` folder has `
 
 - `.github/workflows/installer-smoke.yml` — runs `bin/install.js` for all 6 platforms × {ubuntu, windows} on every PR, asserts the expected skills and config file are present.
 - `.github/workflows/validate-skills.yml` — runs the validator above on every PR.
+- `.github/workflows/skill-triggering.yml` — runs the free, no-API-key OpenCode trigger-accuracy suite (`opencode-run-all.ps1`, matrix vi/en/ja) on every PR; tracks pass/fail trend via GitHub Actions run history. The Claude Code bash suite is NOT wired here (needs a live authenticated `claude` CLI + real API credit per run) — run it locally per "Testing skill triggering" above.
 
 ### Skill file anatomy
 
@@ -224,13 +227,25 @@ Each agent file defines an **input contract** and **output JSON shape**. When sp
 | `test-gen` | `/qa-testplan` | sonnet | Generate test cases from spec |
 | `doc-updater` | `/docs-update` | sonnet | Update baseline docs after verification |
 | `pr-resolver` | `/dev-pr` | sonnet | Analyze PR review comments → propose fixes per comment |
+| `screen-designer` | `/dev-analyze` | haiku | Draft screen spec proposal for UI-affecting tasks |
+| `api-designer` | `/dev-analyze` | haiku | Draft API spec proposal for endpoint-affecting tasks |
 
 ### Permissions model
 
 `.claude/settings.json` gates what Claude Code can do in this repo:
 
-- **Allow**: Read, Glob, Grep, `git log/diff/status`
-- **Deny**: `git push`, `git reset --hard`, `rm -rf`
+- **Allow**: Read, Glob, Grep, Write, Edit, `git log/diff/status`
+- **Deny**: `git push`, `git reset --hard`, `rm -rf`, `curl`, `wget`, `nc`
+
+`curl`/`wget`/`nc` bị deny để giảm rủi ro exfiltration khi 1 lần chạy autonomous/không giám sát (vd: `/dev-autopilot`) xử lý nội dung repo độc hại/đối kháng.
+
+**Về khả năng "evasion" của prefix-glob deny** (verified qua [docs.claude.com/en/docs/claude-code/permissions](https://docs.claude.com/en/docs/claude-code/permissions), mục "Bash" → "Compound commands" và phần env-var stripping, đọc trực tiếp 2026-08-28 — không phải suy đoán):
+
+- **Mid-pipeline (`echo x | curl ...`) đã được xử lý**: Claude Code nhận diện shell operator (`&&`, `||`, `;`, `|`, `|&`, `&`, newline) và match từng subcommand độc lập, nên subcommand `curl ...` sau dấu `|` vẫn bị `Bash(curl*)` chặn.
+- **Leading env-var (`FOO=bar curl ...`) đã được xử lý**: deny rule match qua bất kỳ leading assignment nào (khác với allow rule, vốn chỉ strip 1 whitelist biến "known-safe") — nên `FOO=bar curl ...` vẫn bị `Bash(curl*)` chặn.
+- Do đó 2 kịch bản nêu trong backlog IB-050 (mid-pipeline, leading env-var) **không phải lỗ hổng thật** với behavior hiện tại của Claude Code — không cần workaround (hook) cho việc này.
+
+**Giới hạn còn lại (documented, không phải bug của repo)**: prefix-glob deny match theo *command text*, không hiểu ngữ nghĩa chương trình. `curl` gọi gián tiếp qua interpreter khác (vd `bash script.sh` chứa `curl`, `python -c "import urllib..."`, `node -e "..."`) không bị `Bash(curl*)`/`Bash(wget*)` bắt vì subcommand thực thi là `bash`/`python`/`node`, không phải `curl`. Deny list cũng chỉ gate Bash tool — `WebFetch` là tool riêng, hiện chưa có deny rule tương ứng nên vẫn có thể fetch URL qua đường đó. Vì vậy prefix-glob deny không phải sandbox tuyệt đối; chạy `/dev-autopilot` không giám sát trên nội dung repo không tin cậy/đối kháng không nên coi đây là 1 hard security boundary.
 
 When adding new commands that need shell access, update `settings.json`.
 

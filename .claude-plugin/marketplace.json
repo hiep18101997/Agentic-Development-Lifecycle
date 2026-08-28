@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "agentic-development-lifecycle",
+  "owner": {
+    "name": "hiepdnh"
+  },
+  "metadata": {
+    "description": "Agentic Development Lifecycle — SDLC skill framework for Claude Code, OpenCode, Cursor & Antigravity (English / Tiếng Việt / 日本語)",
+    "version": "1.3.0"
+  },
+  "plugins": [
+    {
+      "name": "agentic-development-lifecycle",
+      "description": "Agentic Development Lifecycle — SDLC skill framework for Claude Code, OpenCode, Cursor & Antigravity (English / Tiếng Việt / 日本語)",
+      "version": "1.3.0",
+      "author": {
+        "name": "hiepdnh"
+      },
+      "homepage": "https://github.com/hiepdnh/Agentic-Development-Lifecycle#readme",
+      "license": "MIT",
+      "repository": "https://github.com/hiepdnh/Agentic-Development-Lifecycle",
+      "keywords": ["claude-code", "codex-cli", "sdlc", "ai-agent", "agentic", "opencode", "cursor", "antigravity", "japanese", "jp-market", "bilingual", "bridge-engineer"],
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./.claude/skills/arch-adr",
+        "./.claude/skills/arch-review",
+        "./.claude/skills/ba-reverse",
+        "./.claude/skills/ba-spec",
+        "./.claude/skills/ba-user-story",
+        "./.claude/skills/be-bridge",
+        "./.claude/skills/be-changerequest",
+        "./.claude/skills/be-glossary",
+        "./.claude/skills/dev-analyze",
+        "./.claude/skills/dev-autopilot",
+        "./.claude/skills/dev-debug",
+        "./.claude/skills/dev-implement",
+        "./.claude/skills/dev-pr",
+        "./.claude/skills/dev-review",
+        "./.claude/skills/docs-project",
+        "./.claude/skills/docs-update",
+        "./.claude/skills/install",
+        "./.claude/skills/ops-deploy",
+        "./.claude/skills/ops-incident",
+        "./.claude/skills/pm-breakdown",
+        "./.claude/skills/pm-dashboard",
+        "./.claude/skills/pm-handover",
+        "./.claude/skills/pm-ideate",
+        "./.claude/skills/pm-kickoff",
+        "./.claude/skills/pm-maintain",
+        "./.claude/skills/pm-release",
+        "./.claude/skills/pm-status",
+        "./.claude/skills/qa-bug",
+        "./.claude/skills/qa-it",
+        "./.claude/skills/qa-regression",
+        "./.claude/skills/qa-testplan",
+        "./.claude/skills/qa-ut",
+        "./.claude/skills/sec-review",
+        "./.claude/skills/sm-retro",
+        "./.claude/skills/sm-standup"
+      ]
+    }
+  ]
+}

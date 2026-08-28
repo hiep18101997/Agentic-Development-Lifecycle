@@ -77,3 +77,5 @@ Important questions:
 | 3 | Is there any contributing factor that was missed? | A: No / B: Yes — factor: ___ / C: Other: ___ |
 | 4 | Who needs to review this RCA before wider sharing? | _(enter name)_ |
 ```
+
+**Wait for confirmation.**

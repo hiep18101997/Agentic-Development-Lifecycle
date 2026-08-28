@@ -60,6 +60,7 @@ TECH STACK:
 - Nếu không tìm thấy → ghi vào `missing_context`, không tự bịa
 - `avoid_touching` — chủ động flag code nguy hiểm/deprecated
 - Không sửa, không tạo file mới
+- `read_status`: `full` nếu file được đọc toàn bộ (file nhỏ, hoặc dưới ngưỡng 200 lines ở Nhiệm vụ bước 2, hoặc file trung tâm của task); `partial` nếu chỉ đọc một phần (file lớn, chỉ vài function/section liên quan) — khi dùng `partial`, `lines` phải phản ánh chính xác range đã đọc, không ước lượng
 
 ## Error handling
 

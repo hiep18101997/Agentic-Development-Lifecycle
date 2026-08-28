@@ -43,7 +43,7 @@ Viết tests theo thứ tự ưu tiên:
 
 ## Output format
 
-Trả về test file(s) hoàn chỉnh, ready to run. Kèm:
+Trả về JSON duy nhất trong markdown code block. Không prose, không giải thích thêm. Mỗi test file gồm full source code trong field `content`.
 
 ```json
 {
@@ -51,7 +51,8 @@ Trả về test file(s) hoàn chỉnh, ready to run. Kèm:
     {
       "path": "src/auth/__tests__/otp.service.test.ts",
       "ac_covered": ["AC-001", "AC-002"],
-      "test_count": 8
+      "test_count": 8,
+      "content": "import { describe, it, expect } from 'vitest';\n\ndescribe('OtpService', () => {\n  it('should generate 6-digit OTP when requested', () => {\n    // ...\n  });\n});\n"
     }
   ],
   "ac_not_covered": ["AC-003 — requires E2E, not unit testable"],
@@ -60,8 +61,6 @@ Trả về test file(s) hoàn chỉnh, ready to run. Kèm:
   ]
 }
 ```
-
-Sau đó paste nội dung từng test file.
 
 ## Error handling
 

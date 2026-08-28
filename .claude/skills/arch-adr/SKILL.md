@@ -55,3 +55,7 @@ Câu hỏi trước khi finalize:
 
 Sau khi confirm, tôi sẽ update trạng thái sang "Accepted".
 ```
+
+Sau khi ADR chuyển sang "Accepted", gợi ý chạy `node bin/generate-project-context.js` để refresh digest tự động `docs/project-context.md` (không hand-edit file này).
+
+**Chờ confirm.**

@@ -29,6 +29,8 @@ Trước khi bắt đầu:
 | 4 | Có action items từ retro trước chưa done không? | A: Không / B: Có — [N] items chưa done / C: Khác: ___ |
 ```
 
+**Chờ confirm.**
+
 ### Bước 2 — Tổng hợp feedback
 
 Nhận input từ team (paste anonymous feedback hay notes từ session).
@@ -114,3 +116,5 @@ Câu hỏi quan trọng:
 | 3 | Có theme quan trọng bị gộp nhầm cần tách ra không? | A: Không / B: Có — theme: ___ / C: Khác: ___ |
 | 4 | Action items cũ chưa done — cần escalate hay drop? | A: Escalate / B: Drop / C: Carry over thêm 1 sprint / D: Khác: ___ |
 ```
+
+**Chờ confirm.**

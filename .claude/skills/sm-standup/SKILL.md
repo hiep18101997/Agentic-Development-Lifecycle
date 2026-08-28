@@ -77,3 +77,5 @@ Tôi nhận thấy:
 | 2 | Task [Y] at risk — chỉ còn [Z] ngày | A: Cần hỗ trợ thêm / B: Đang xử lý / C: Đã scope lại / D: Khác: ___ |
 | 3 | Velocity bất thường — có gì tôi miss không? | A: Không miss gì / B: Có — context: ___ / C: Khác: ___ |
 ```
+
+**Chờ confirm.**

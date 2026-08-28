@@ -33,6 +33,8 @@ Tell me: what problem are you trying to solve?
 
 ### Step 2 — Diverge: Create 5-8 variations
 
+**Research before generating variations**: Use `web_search` (or ask the user if no search tool is available) to check whether a similar product/pattern already solves this problem. Fold any relevant findings into the variations below — avoid generating ideas in a vacuum, ignoring prior art.
+
 Analyze the idea through these lenses:
 
 - **Inversion**: What if we did the opposite?
@@ -76,13 +78,45 @@ Cluster the variations into 2-3 strategic directions:
 - [Thing 1 not in this scope]
 - [Thing 2 not done]
 - [Thing 3 not done]
-
-| # | Question | Choice |
-|---|---------|--------|
-| 1 | Is the "Not Doing" list correct? | A: Correct / B: Something still in scope — item: ___ / C: Other: ___ |
-| 2 | Is the success metric measurable? | A: Yes / B: Not enough — change to: ___ / C: Other: ___ |
-| 3 | Ready to run /ba-spec with this direction? | A: Ready / B: Need more exploration — direction: ___ / C: Other: ___ |
 ```
+
+### Step 5 — Final Gate: Confirm direction
+
+```
+AskUserQuestion({
+  questions: [
+    {
+      question: "Is the \"Not Doing\" list correct?",
+      header: "Not Doing",
+      multiSelect: false,
+      options: [
+        { label: "Correct", description: "Not Doing list is accurate" },
+        { label: "Still in scope", description: "Some items are still in scope — needs adjustment" }
+      ]
+    },
+    {
+      question: "Is the success metric measurable?",
+      header: "Metric",
+      multiSelect: false,
+      options: [
+        { label: "Yes", description: "Success metric is measurable" },
+        { label: "Not enough", description: "Need to clarify the success metric further" }
+      ]
+    },
+    {
+      question: "Ready to run /ba-spec with this direction?",
+      header: "Next step",
+      multiSelect: false,
+      options: [
+        { label: "Ready", description: "Run /ba-spec to write detailed specification" },
+        { label: "Need more exploration", description: "Need to explore other directions before specing" }
+      ]
+    }
+  ]
+})
+```
+
+**Wait for confirmation.**
 
 ---
 

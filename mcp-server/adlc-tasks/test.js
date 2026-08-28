@@ -6,7 +6,7 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { getTaskStatus, getRiskClassification, parseRiskClassifier, lastAuditEntry } = require('./server');
+const { getTaskStatus, getRiskClassification, parseRiskClassifier, lastAuditEntry, isValidTaskId } = require('./server');
 
 const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'adlc-task-mcp-'));
 
@@ -97,5 +97,33 @@ assert(risk.referenceChecklist, 'reference checklist must now be populated');
 assert.deepStrictEqual(risk.recordedClassification, { lane: 'normal', source: 'requirements.md' },
   "must find the task's already-recorded '**Lane**: normal' from requirements.md");
 assert(/does NOT compute/.test(risk.note), 'the honesty disclaimer must always be present');
+
+// --- isValidTaskId: path-traversal / injection guard (regression for the fix landed this session) ---
+// Non-empty malicious taskIds must be rejected by isValidTaskId() and by both call sites' guard.
+const badTaskIds = [
+  '../../../../etc/passwd',
+  '..\\..\\windows\\win.ini',
+  'TASK-001/../../secret',
+  '/etc/passwd',
+  'TASK-001\0',
+  'TASK-001\nX-Injected: 1',
+  'a'.repeat(101),
+];
+for (const bad of badTaskIds) {
+  assert.strictEqual(isValidTaskId(bad), false, `isValidTaskId must reject ${JSON.stringify(bad)}`);
+  assert.throws(() => getTaskStatus(bad, repoRoot), /Invalid taskId/, `getTaskStatus must reject ${JSON.stringify(bad)}`);
+  assert.throws(() => getRiskClassification({ taskId: bad }, repoRoot), /Invalid taskId/, `getRiskClassification must reject ${JSON.stringify(bad)}`);
+}
+// Empty string is falsy: isValidTaskId('') is false, but both call sites treat a falsy taskId as
+// "not provided" (pre-existing behavior, unrelated to this fix) rather than "invalid" — getTaskStatus
+// throws its own separate "taskId is required" error, getRiskClassification silently omits the
+// task-specific lookup. Verify both, distinctly from the malicious-input rejection above.
+assert.strictEqual(isValidTaskId(''), false, 'isValidTaskId must reject empty string');
+assert.throws(() => getTaskStatus('', repoRoot), /taskId is required/, 'getTaskStatus must reject empty taskId (pre-existing required-field check)');
+assert.doesNotThrow(() => getRiskClassification({ taskId: '' }, repoRoot), 'getRiskClassification treats falsy taskId as "not provided", not an error');
+const goodTaskIds = ['TASK-042', 'TASK-MCP-POC', 'a', 'A1-b2-C3'];
+for (const good of goodTaskIds) {
+  assert.strictEqual(isValidTaskId(good), true, `isValidTaskId must accept ${JSON.stringify(good)}`);
+}
 
 console.log('adlc-task-mcp tests: get_task_status (artifacts/agent-state/audit) and get_risk_classification (reference parse + recorded lookup) passed.');

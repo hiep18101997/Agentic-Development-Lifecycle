@@ -13,7 +13,8 @@ lang: en
 **Date Created**: [YYYY-MM-DD]  
 **BA**: [Name]  
 **Status**: Draft / Review / Approved  
-**Lane**: tiny | normal | high-risk — _(see `docs/risk-classifier.md`)_
+**Lane**: tiny | normal | high-risk — _(see `docs/risk-classifier.md`)_  
+**Depends on**: [Comma-separated list of TASK-IDs, e.g. TASK-003, TASK-007 — or `None` if no dependency]
 
 ---
 

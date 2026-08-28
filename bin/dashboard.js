@@ -35,15 +35,51 @@ function parseRisk(fp) {
   catch { return null; }
 }
 
+function parseDependsOn(fp) {
+  try {
+    const content = fs.readFileSync(fp, 'utf8');
+    const m = content.match(/\*\*Depends on\*\*:\s*(.+)/i);
+    if (!m) return [];
+    const raw = m[1].trim();
+    if (!raw || raw.startsWith('[') || /^none$/i.test(raw)) return [];
+    return raw.split(',').map(s => s.trim()).filter(Boolean);
+  } catch { return []; }
+}
+
+// A task is "done" once it reaches the qa phase (see PHASE_META.qa = 'QA / Done').
+// Dependency status is display-only — no auto-dispatch reads or acts on it.
+function computeDependencyStatus(tasks) {
+  const byId = new Map(tasks.map(t => [t.id, t]));
+  for (const t of tasks) {
+    const blockers = [];
+    for (const depId of t.dependsOn) {
+      const dep = byId.get(depId);
+      if (!dep) blockers.push({ id: depId, reason: 'unknown task (not found in docs/tasks)' });
+      else if (dep.phase !== 'qa') blockers.push({ id: depId, reason: `phase=${dep.phase}` });
+    }
+    t.blocked  = blockers.length > 0;
+    t.blockers = blockers;
+  }
+  return tasks;
+}
+
 function parseAudit(fp, taskId) {
   try {
     const content = fs.readFileSync(fp, 'utf8');
     const entries = [];
     // ## YYYY-MM-DD HH:mm JST · skill=`/xx:yy`
     const re = /^## (\d{4}-\d{2}-\d{2} \d{2}:\d{2})[^\n]*[·\-]\s*skill=`?([^\s`·\n]+)`?/gm;
+    const heads = [];
     let m;
-    while ((m = re.exec(content)) !== null) {
-      entries.push({ type: 'audit', date: m[1], skill: m[2].trim(), taskId });
+    while ((m = re.exec(content)) !== null) heads.push({ index: m.index, date: m[1], skill: m[2].trim() });
+    for (let i = 0; i < heads.length; i++) {
+      const start = heads[i].index;
+      const end   = i + 1 < heads.length ? heads[i + 1].index : content.length;
+      const body  = content.slice(start, end);
+      // Optional self-reported "**duration**: <N>m" — see templates/audit.md field docs.
+      const durMatch = body.match(/\*\*duration\*\*:\s*(\d+)\s*m/i);
+      const duration = durMatch ? parseInt(durMatch[1], 10) : null;
+      entries.push({ type: 'audit', date: heads[i].date, skill: heads[i].skill, taskId, duration });
     }
     return entries;
   } catch { return []; }
@@ -59,6 +95,7 @@ function scanTasks(tasksDir) {
     const phase   = derivePhase(files);
     const title   = files.includes('requirements.md') ? parseTitle(path.join(taskDir, 'requirements.md')) : null;
     const risk    = files.includes('analysis.md')     ? parseRisk(path.join(taskDir, 'analysis.md'))     : null;
+    const dependsOn = files.includes('requirements.md') ? parseDependsOn(path.join(taskDir, 'requirements.md')) : [];
 
     let lastMod = 0;
     for (const f of files) {
@@ -66,8 +103,9 @@ function scanTasks(tasksDir) {
     }
     if (files.includes('audit.md')) auditEntries.push(...parseAudit(path.join(taskDir, 'audit.md'), entry.name));
 
-    tasks.push({ id: entry.name, title: title || entry.name, phase, risk, files, lastMod: lastMod ? new Date(lastMod).toISOString() : null });
+    tasks.push({ id: entry.name, title: title || entry.name, phase, risk, dependsOn, files, lastMod: lastMod ? new Date(lastMod).toISOString() : null });
   }
+  computeDependencyStatus(tasks);
   return {
     tasks: tasks.sort((a, b) => PHASE_ORDER.indexOf(a.phase) - PHASE_ORDER.indexOf(b.phase)),
     auditEntries,
@@ -142,9 +180,20 @@ function scanSkillCatalog(skillsDir) {
 }
 
 function crossRefUsage(skills, auditEntries) {
-  const map = {};
-  for (const e of auditEntries) { const k = e.skill.replace(/^\//, ''); map[k] = (map[k] || 0) + 1; }
-  return skills.map(s => ({ ...s, usageCount: map[s.name] || 0 }));
+  const usage = {};
+  const durations = {};
+  for (const e of auditEntries) {
+    const k = e.skill.replace(/^\//, '');
+    usage[k] = (usage[k] || 0) + 1;
+    if (typeof e.duration === 'number' && !Number.isNaN(e.duration)) {
+      (durations[k] = durations[k] || []).push(e.duration);
+    }
+  }
+  return skills.map(s => {
+    const ds = durations[s.name] || [];
+    const avgDurationMin = ds.length ? Math.round(ds.reduce((a, b) => a + b, 0) / ds.length) : null;
+    return { ...s, usageCount: usage[s.name] || 0, avgDurationMin, durationSamples: ds.length };
+  });
 }
 
 function countDir(dirPath) {
@@ -172,9 +221,17 @@ function build() {
     api:       countDir(path.join(ROOT, 'docs', 'api')),
   };
 
-  // Merged activity timeline (audit + git), sorted desc
+  // Merged activity timeline (audit + git), sorted desc.
+  // Dates use Date-object comparison (not raw string compare) so
+  // non-ISO/unparseable dates don't misorder; NaN dates sort last.
   const activity = [...auditEntries, ...gitAct]
-    .sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0))
+    .sort((a, b) => {
+      const ta = new Date(a.date).getTime();
+      const tb = new Date(b.date).getTime();
+      const va = Number.isNaN(ta) ? -Infinity : ta;
+      const vb = Number.isNaN(tb) ? -Infinity : tb;
+      return vb - va;
+    })
     .slice(0, 60);
 
   const nowJST = toJST(new Date().toISOString());
@@ -185,7 +242,7 @@ function build() {
     process.exit(1);
   }
 
-  const html = fs.readFileSync(TEMPLATE, 'utf8').replace('{{EMBEDDED_JSON}}', JSON.stringify(data, null, 2));
+  const html = fs.readFileSync(TEMPLATE, 'utf8').replace('{{EMBEDDED_JSON}}', () => JSON.stringify(data, null, 2).replace(/</g, '\\u003c'));
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, html, 'utf8');
 
@@ -219,8 +276,12 @@ function main() {
     path.join(ROOT, 'docs', 'tasks'),
     path.join(ROOT, 'docs', 'improvement-backlog.md'),
     path.join(ROOT, 'docs', 'validation-matrix.md'),
+    path.join(ROOT, '.git', 'HEAD'),
+    path.join(ROOT, '.git', 'index'),
   ]) {
-    if (fs.existsSync(t)) fs.watch(t, { recursive: true }, trigger);
+    try {
+      if (fs.existsSync(t)) fs.watch(t, { recursive: true }, trigger);
+    } catch { /* not a git repo, or watch unsupported for this path */ }
   }
 }
 

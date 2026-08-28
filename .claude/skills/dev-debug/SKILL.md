@@ -38,9 +38,17 @@ Trước tiên:
 
 ### Bước 2 — Localize
 
-Spawn subagent để đọc code liên quan (read-only):
+Spawn subagent để đọc code liên quan (read-only), dùng lại `agents/code-scout.md`:
 
-> "Tìm code xử lý [behavior mô tả]. Trả về file:line và flow từ entry point đến điểm có thể fail. Không sửa gì."
+```
+Agent(
+  description: "Find code related to reported bug",
+  prompt: "Tìm code xử lý hành vi mô tả bên dưới. Trả về JSON theo agents/code-scout.md spec — relevant_files (file:line + lý do suspect) và entry_points (entry point đến điểm có thể fail). Chỉ đọc, không sửa gì.\n\nTASK SUMMARY: [mô tả lỗi + steps to reproduce + error message từ Bước 1]\nTECH STACK: [language, framework, folder structure nếu biết]",
+  model: "haiku"
+)
+```
+
+Subagent trả về `relevant_files` (file:line + lý do suspect) và `entry_points` — dùng để trình bày bên dưới.
 
 Trình bày:
 
@@ -93,11 +101,15 @@ Chỉ sau khi xác nhận root cause:
 | C | Khác: ___ |
 ```
 
+**Chờ confirm.**
+
 **Ask First Gate**: Nếu fix liên quan đến bất kỳ thay đổi nhạy cảm nào (`assets/ask-first-gates.md`) → cần senior review trước khi apply.
 
 ### Bước 5 — Guard
 
 Sau khi fix:
+
+**Bắt buộc**: Re-chạy đúng minimal reproduction case đã capture ở Bước 3, xác nhận lỗi gốc không còn reproduce được. Không được coi bug là đã đóng nếu chưa re-verify lại bằng minimal reproduction này.
 
 ```
 ## Fix đã apply.
@@ -111,6 +123,8 @@ Tôi cũng sẽ thêm test để prevent regression:
 | B | Có — edge case: ___ |
 | C | Khác: ___ |
 ```
+
+**Chờ confirm.**
 
 ---
 

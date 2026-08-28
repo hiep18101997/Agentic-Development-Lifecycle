@@ -38,9 +38,17 @@ First:
 
 ### Step 2 — Localize
 
-Spawn a subagent to read related code (read-only):
+Spawn a subagent to read related code (read-only), reusing `agents/code-scout.md`:
 
-> "Find code handling [describe behavior]. Return file:line and the flow from entry point to the potential failure point. Do not modify anything."
+```
+Agent(
+  description: "Find code related to reported bug",
+  prompt: "Find code handling the behavior described below. Return JSON per agents/code-scout.md spec — relevant_files (file:line + reason for suspicion) and entry_points (entry point to the potential failure point). Read-only, do not modify anything.\n\nTASK SUMMARY: [bug description + steps to reproduce + error message from Step 1]\nTECH STACK: [language, framework, folder structure if known]",
+  model: "haiku"
+)
+```
+
+Subagent returns `relevant_files` (file:line + reason for suspicion) and `entry_points` — use these to present below.
 
 Present:
 
@@ -93,11 +101,15 @@ I recommend Fix A first (smaller, easier to review).
 | C | Other: ___ |
 ```
 
+**Wait for confirmation.**
+
 **Ask First Gate**: If the fix involves any sensitive changes (`assets/ask-first-gates.md`) → needs senior review before applying.
 
 ### Step 5 — Guard
 
 After applying the fix:
+
+**Mandatory**: Re-run the exact minimal reproduction case captured in Step 3, and confirm the original failure no longer occurs. The bug MUST NOT be considered closed until it has been re-verified with this minimal reproduction.
 
 ```
 ## Fix applied.
@@ -111,6 +123,8 @@ I will also add a test to prevent regression:
 | B | Yes — edge case: ___ |
 | C | Other: ___ |
 ```
+
+**Wait for confirmation.**
 
 ---
 

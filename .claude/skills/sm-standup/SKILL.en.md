@@ -77,3 +77,5 @@ I noticed:
 | 2 | Task [Y] is at risk — only [Z] days left | A: Needs additional support / B: Being handled / C: Already rescoped / D: Other: ___ |
 | 3 | Velocity looks unusual — am I missing anything? | A: Nothing missing / B: Yes — context: ___ / C: Other: ___ |
 ```
+
+**Wait for confirmation.**

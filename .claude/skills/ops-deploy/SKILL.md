@@ -137,4 +137,6 @@ Trước khi bắt đầu deploy:
 | 3 | Có dependency service nào chưa được notify không? | A: Tất cả đã notify / B: Còn service: ___ / C: Khác: ___ |
 ```
 
+**Chờ confirm.**
+
 **Không deploy cho đến khi tất cả câu hỏi trên được trả lời.**

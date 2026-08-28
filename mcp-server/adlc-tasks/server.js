@@ -53,6 +53,16 @@ function lastAuditEntry(content) {
   return last.split(/\r?\n---\r?\n/)[0].trim();
 }
 
+// Task IDs are attacker-controllable MCP tool-call arguments that get path.join()'d straight into a
+// filesystem path (docs/tasks/{taskId}/...). Validate against the project's TASK-XXX convention
+// (templates/task-doc-requirements.md, CLAUDE.md "Type 1 — Task Docs") BEFORE any fs access — reject
+// anything with path separators, "..", or other characters outside that convention.
+const TASK_ID_PATTERN = /^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$/;
+
+function isValidTaskId(id) {
+  return typeof id === 'string' && id.length > 0 && id.length <= 100 && TASK_ID_PATTERN.test(id);
+}
+
 const TASK_FILES = {
   requirements: 'requirements.md',
   analysis: 'analysis.md',
@@ -66,6 +76,9 @@ const TASK_FILES = {
 
 function getTaskStatus(taskId, repoRoot) {
   if (!taskId) throw new Error('taskId is required');
+  if (!isValidTaskId(taskId)) {
+    throw new Error(`Invalid taskId ${JSON.stringify(taskId)} — must match ${TASK_ID_PATTERN} (e.g. TASK-042), no path separators or "..".`);
+  }
   const taskDir = path.join(repoRoot, 'docs', 'tasks', taskId);
   if (!fs.existsSync(taskDir)) {
     return { taskId, exists: false, note: `No docs/tasks/${taskId}/ directory found.` };
@@ -132,6 +145,9 @@ function getRiskClassification({ taskId, lang } = {}, repoRoot) {
   let recordedClassification = null;
 
   if (taskId) {
+    if (!isValidTaskId(taskId)) {
+      throw new Error(`Invalid taskId ${JSON.stringify(taskId)} — must match ${TASK_ID_PATTERN} (e.g. TASK-042), no path separators or "..".`);
+    }
     const taskDir = path.join(repoRoot, 'docs', 'tasks', taskId);
     for (const filename of ['requirements.md', 'analysis.md', 'agent-state.md']) {
       const content = readFileIfExists(path.join(taskDir, filename));
@@ -241,4 +257,5 @@ module.exports = {
   parseRiskClassifier,
   parseFrontmatter,
   lastAuditEntry,
+  isValidTaskId,
 };

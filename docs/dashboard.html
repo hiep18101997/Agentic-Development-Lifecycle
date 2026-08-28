@@ -208,26 +208,21 @@ tr:hover    { background: var(--hover); }
 <body>
 <script>
 const DATA = {
-  "generatedAt": "2026-05-10 23:18 JST",
+  "generatedAt": "2026-08-27 23:17 JST",
   "watchMode": false,
   "tasks": [
-    {
-      "id": "UX-001",
-      "title": "UX-001",
-      "phase": "empty",
-      "risk": null,
-      "files": [],
-      "lastMod": null
-    },
     {
       "id": "SKILL-001",
       "title": "Per-Agent Model Selection for Token Optimization",
       "phase": "discovery",
       "risk": null,
+      "dependsOn": [],
       "files": [
         "requirements.md"
       ],
-      "lastMod": "2026-05-09T02:03:19.097Z"
+      "lastMod": "2026-08-27T11:24:12.636Z",
+      "blocked": false,
+      "blockers": []
     }
   ],
   "backlog": [
@@ -263,7 +258,7 @@ const DATA = {
       "id": "IB-005",
       "source": "Tổng quát (học từ AIDLC repo)",
       "friction": "Không có observability layer — PM/BE/SM phải đào từng `docs/tasks/[ID]/*.md` để biết sprint health",
-      "fix": "Tạo `bin/dashboard.js` generator + `templates/dashboard.html` + `/pm:dashboard` slash command",
+      "fix": "Tạo `bin/dashboard.js` generator + `templates/dashboard.html` + `/pm-dashboard` slash command",
       "status": "✅ done"
     },
     {
@@ -272,6 +267,314 @@ const DATA = {
       "friction": "Dashboard v1 chỉ có kanban + 2 table đơn giản, thiếu git activity/skill heatmap/validation chart/watch mode",
       "fix": "Rebuild v2: ckm-design-system tokens, 6 new parsers (git/audit/validation/skills/growth), SVG charts, watch mode",
       "status": "✅ done"
+    },
+    {
+      "id": "IB-007",
+      "source": "Competitive research (G-01)",
+      "friction": "Không có knowledge transfer / handover flow — JP client hỏi \"dev nghỉ thì sao?\"",
+      "fix": "Tạo /pm-handover skill + 引き継ぎ書 template (VN + JP)",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-008",
+      "source": "Competitive research (G-02)",
+      "friction": "Không có maintenance mode workflow — sprint lifecycle quá heavy cho sustain phase",
+      "fix": "Tạo /pm-maintain skill với triage matrix + 月次保守報告書",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-009",
+      "source": "Competitive research (G-03)",
+      "friction": "Không có formal 変更管理 — spec thay đổi giữa sprint không có approval trail",
+      "fix": "Tạo /be-changerequest skill + CR document template (VN + JP)",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-010",
+      "source": "Competitive research (G-04)",
+      "friction": "Không có release notes skill — JP clients muốn リリースノート chính thức",
+      "fix": "Tạo /pm-release skill với HTML + Markdown output",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-011",
+      "source": "Competitive research (G-05)",
+      "friction": "Glossary template có nhưng không có skill cập nhật — term mới bị bỏ qua",
+      "fix": "Tạo /be-glossary skill",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-012",
+      "source": "Competitive research (G-06)",
+      "friction": "ba:reverse chỉ brownfield — không có greenfield kickoff flow",
+      "fix": "Tạo /pm-kickoff skill với tech stack ADRs + Sprint 0 checklist",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-013",
+      "source": "Competitive research (G-07)",
+      "friction": "Không có PR comment resolver — dev phải manually address từng comment",
+      "fix": "Tạo agents/pr-resolver.md + wire vào /dev-pr opt-in gate",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-014",
+      "source": "Competitive research (G-08)",
+      "friction": "dev:implement không enforce test-first — TDD lane không có",
+      "fix": "Thêm TDD lane opt-in (Bước 1b) vào /dev-implement",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-015",
+      "source": "Competitive research (G-09)",
+      "friction": "dev:review bỏ qua performance lens — N+1, caching, scalability không được check",
+      "fix": "Thêm Lens 3 Performance vào /dev-review",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-016",
+      "source": "Framework review 2026-05-13",
+      "friction": "`be:changerequest`, `pm:handover` inline templates thay vì reference `templates/` — DRY risk",
+      "fix": "Extract inline templates ra `templates/change-request.md`, `templates/handover.md`",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-017",
+      "source": "Framework review 2026-05-13",
+      "friction": "`pm:ideate` dùng plain text Q&A thay vì `AskUserQuestion` tool",
+      "fix": "Refactor sang AskUserQuestion cho gates có options rõ ràng",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-018",
+      "source": "Framework review 2026-05-13",
+      "friction": "`install.md` dùng text confirmation thay vì `AskUserQuestion`",
+      "fix": "Chuyển sang AskUserQuestion cho consistency",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-019",
+      "source": "Framework review 2026-05-13",
+      "friction": "`dev:debug.md` mô tả subagent trong lý thuyết nhưng không spawn trong execution flow",
+      "fix": "Hoặc wire Agent() spawn vào flow, hoặc xoá phần lý thuyết",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-020",
+      "source": "Framework review 2026-05-13",
+      "friction": "`agents/test-gen.md` output hybrid JSON + prose, không consistent với 7 agents còn lại",
+      "fix": "Chuẩn hoá thành pure JSON",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-021",
+      "source": "Framework review 2026-05-13",
+      "friction": "`agents/code-scout.md` `read_status: \"partial \\",
+      "fix": "full\"` không có guidance khi nào dùng gì",
+      "status": "Thêm decision rule vào agent spec"
+    },
+    {
+      "id": "IB-022",
+      "source": "Framework review 2026-05-13",
+      "friction": "`bin/dashboard.js:176` date comparison dùng string compare — fragile với non-ISO inputs",
+      "fix": "Convert sang Date object trước khi compare",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-023",
+      "source": "Framework review 2026-05-13",
+      "friction": "`bin/dashboard.js` watch mode không watch git activity changes",
+      "fix": "Thêm git HEAD/index vào watcher",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-024",
+      "source": "Framework review 2026-05-13",
+      "friction": "`setup.ps1` + `setup.sh` prompt `[y/N]` chỉ accept `Y/y`, không accept `yes` (không consistent với `install.js`)",
+      "fix": "Accept cả `yes`/`y` (case-insensitive)",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-025",
+      "source": "Framework review 2026-05-13",
+      "friction": "`setup.ps1:162` GitHub URL hardcoded — khó maintain khi đổi org/repo",
+      "fix": "Đưa URL ra biến đầu file",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-026",
+      "source": "Security audit 2026-08-27",
+      "friction": "`bin/dashboard.js` embed `JSON.stringify(data)` thô vào `\u003cscript>` inline của `templates/dashboard.html` — chuỗi `\u003c/script>` trong commit message/task title thoát khỏi thẻ script, XSS trong dashboard.html sinh ra",
+      "fix": "Escape `\u003c` (`\\u003c`) trong embedded JSON trước khi substitute",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-027",
+      "source": "Security audit 2026-08-27",
+      "friction": "`mcp-server/adlc-tasks/server.js` `getTaskStatus`/`getRiskClassification` nối `taskId` do client cung cấp vào fs path không sanitize — path traversal",
+      "fix": "Thêm guard `isValidTaskId()` (pattern TASK-XXX) trước path.join",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-028",
+      "source": "CI audit 2026-08-27",
+      "friction": "`tests/skill-triggering/opencode-run-test.ps1` không bao giờ so khớp prompt với description — luôn pass nếu file tồn tại, không bắt được regression trigger sai skill",
+      "fix": "Implement keyword/trigger-phrase overlap check thực sự",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-029",
+      "source": "Skill consistency audit 2026-08-27",
+      "friction": "11 skills (sm-standup, sm-retro, ops-incident, dev-debug, arch-review, arch-adr, ops-deploy, docs-update, pm-status, qa-testplan, qa-bug) có gate Q&A table nhưng không emit bold marker `**Chờ confirm.**`/`**Wait for confirmation.**` theo yêu cầu CLAUDE.md",
+      "fix": "Thêm marker sau mỗi gate block (VN+EN)",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-030",
+      "source": "Skill consistency audit 2026-08-27",
+      "friction": "CLAUDE.md Subagent table thiếu `screen-designer` + `api-designer` (đang live, được dev-analyze Bước 5.5 spawn)",
+      "fix": "Thêm 2 dòng vào bảng",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-031",
+      "source": "Skill consistency audit 2026-08-27",
+      "friction": "6/35 file `.ja.md` (dev-analyze, pm-maintain, install, be-changerequest, be-glossary, be-bridge) là full inline JA translation (150-313 dòng) thay vì convention pointer-style của 29/35 skill còn lại (tóm tắt ngắn + link sang EN/VN canonical)",
+      "fix": "Quyết định: collapse về pointer-style, HOẶC document rõ đây là exception có chủ đích cho skill JP-client-facing trong CLAUDE.md",
+      "status": "open"
+    },
+    {
+      "id": "IB-032",
+      "source": "Security audit 2026-08-27",
+      "friction": "`bin/install.js`/`setup.sh`/`setup.ps1` `--yes` bypass confirm prompt mà không có safety check độc lập trên destination — `--yes --update` chạy unattended có thể silently overwrite framework files sai thư mục",
+      "fix": "Thêm target-sanity guard (yêu cầu marker file hoặc `--force` khi target không rỗng/không liên quan) khi `--yes` kết hợp `--update`",
+      "status": "open"
+    },
+    {
+      "id": "IB-033",
+      "source": "Security audit 2026-08-27",
+      "friction": "Chưa verify CVE status của `@clack/prompts`/`picocolors` từ nội dung file",
+      "fix": "Chạy `npm audit` / tra OSV trước release tiếp theo",
+      "status": "open"
+    },
+    {
+      "id": "IB-034",
+      "source": "CI audit 2026-08-27",
+      "friction": "`.github/workflows/*.yml` dùng mutable tag (`actions/checkout@v4`, `actions/setup-node@v4`) thay vì SHA-pinned — supply-chain hardening gap chuẩn",
+      "fix": "Pin về commit SHA",
+      "status": "open"
+    },
+    {
+      "id": "IB-035",
+      "source": "CI audit 2026-08-27",
+      "friction": "`package.json` `engines.node: \">=16\"` chưa từng được test thật — cả 2 CI workflow chỉ chạy Node 20",
+      "fix": "Thêm job Node 16 vào installer-smoke.yml, hoặc nâng floor khai báo cho khớp thực tế",
+      "status": "open"
+    },
+    {
+      "id": "IB-036",
+      "source": "CI audit 2026-08-27",
+      "friction": "Không có `npm test` script dù có thư mục `tests/` — `scripts/validate-skills.js` (không phụ thuộc live API) là candidate tự nhiên cho `npm test` nhưng chưa được wire",
+      "fix": "Thêm `\"test\": \"node scripts/validate-skills.js\"` vào package.json scripts",
+      "status": "open"
+    },
+    {
+      "id": "IB-037",
+      "source": "Follow-up từ fix IB-028",
+      "friction": "Prompt JA của OpenCode skill-triggering dùng dấu ngoặc full-width `「...」` cho trigger phrase; matcher mới của `opencode-run-test.ps1` chỉ parse dấu `\"...\"` ASCII — chạy suite JA sẽ không tìm thấy quoted phrase nào",
+      "fix": "Mở rộng regex trigger-phrase để match cả `「...」`",
+      "status": "open"
+    },
+    {
+      "id": "IB-038",
+      "source": "CI audit 2026-08-27",
+      "friction": "Cursor và Antigravity installer-smoke check chỉ assert file count/existence, không có content/frontmatter validator tương đương `scripts/validate-codex-skills.js` (đang gate codex/copilot)",
+      "fix": "Mở rộng pattern validate-codex-skills.js (hoặc validator nhẹ mới) sang output cursor/antigravity",
+      "status": "open"
+    },
+    {
+      "id": "IB-039",
+      "source": "Competitive research (G-10) 2026-08-27",
+      "friction": "Không có cơ chế Cross-Harness Review — `/dev-review` và `/dev-autopilot`'s 2 evaluator đều chạy cùng harness/model, reviewer có thể \"tự review chính mình\" (so với ai-sdlc-framework's DSSE-attested cross-harness review)",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-10` — 2 phương án: opt-in independent-harness gate trong dev-review, hoặc model đa dạng hơn cho autopilot-reviewer/adversary",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-040",
+      "source": "Competitive research (G-11) 2026-08-27",
+      "friction": "Không có multi-task dependency-graph dispatcher — `/dev-autopilot` chỉ tự động 1 task, không như ai-sdlc-framework's `cli-orchestrator tick` duyệt dependency graph nhiều task",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-11` — field `Depends on` + dashboard panel (nhẹ) vs full autonomous dispatcher (nặng, mâu thuẫn Human Gate)",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-041",
+      "source": "Competitive research (G-12) 2026-08-27",
+      "friction": "`/pm-ideate` thiếu bước research cạnh tranh + quyết định Go/Kill rõ ràng so với Spec Kit's assess extension (intake→research→define→shape→decide)",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-12` — thêm sub-bước research + 3-way Go/Cần research thêm/Kill",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-042",
+      "source": "Competitive research (G-13) 2026-08-27",
+      "friction": "`/dev-debug` không bắt buộc re-run minimal reproduction sau fix để tự xác nhận khớp báo cáo gốc, khác Spec Kit's `/speckit-converge` loop",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-13` — thêm bắt buộc re-verify vào Bước 5 Guard",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-043",
+      "source": "Competitive research (G-14) 2026-08-27",
+      "friction": "ADLC chưa phân phối qua Claude Code Plugin Marketplace (chuẩn official từ 12/2025, `anthropics/skills` + BMAD-METHOD đều đã dùng)",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-14` — thêm `.claude-plugin/marketplace.json` làm kênh song song, hoặc submit vào awesome-list bên thứ 3",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-044",
+      "source": "Competitive research (G-15) 2026-08-27",
+      "friction": "`/dev-review` chưa nhắc tường minh dùng browser tool verify UI-affecting task, khác Antigravity 2.0's built-in browser verification",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-15` — thêm gợi ý browser verify vào Lens 1 Code Quality",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-045",
+      "source": "Competitive research (G-16) 2026-08-27",
+      "friction": "`.claude/settings.json` chưa có deny-list network tool (curl/wget/nc) phòng exfiltration khi chạy `/dev-autopilot` không giám sát, khác Cursor/Codex CLI's OS/kernel-level sandbox",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-16` — khuyến nghị deny-list mở rộng trong CLAUDE.md",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-046",
+      "source": "Competitive research (G-17) 2026-08-27",
+      "friction": "`docs/decisions/ADR` không có 1 \"project-context digest\" auto-load như BMAD's durable-context concept — mỗi skill phải tự đọc lại toàn bộ ADR history",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-17` — cân nhắc `docs/project-context.md` digest (rủi ro DRY/second-source-of-truth nếu không maintain đều)",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-047",
+      "source": "Competitive research (G-18) 2026-08-27",
+      "friction": "`templates/audit.md` không có tamper-evidence tối thiểu (hash) so với ai-sdlc-framework's DSSE attestation — quan trọng cho compliance JP client",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-18` — thêm field hash SHA-256 qua `bin/audit-hash.js` helper",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-048",
+      "source": "Competitive research (G-19) 2026-08-27",
+      "friction": "Cài đặt ADLC có 7 flag riêng biệt, UX phức tạp hơn \"1-command install\" của Antigravity Awesome Skills và các đối thủ",
+      "fix": "Xem `docs/analysis/competitive-research-2026.md#G-19` — cân nhắc interactive picker khi chạy không flag trong `bin/install.js`",
+      "status": "✅ done"
+    },
+    {
+      "id": "IB-049",
+      "source": "Independent review 2026-08-27 (post-implementation dogfood)",
+      "friction": "`tests/skill-triggering/opencode-run-test.ps1`'s fuzzy fallback matching does raw substring containment (not word-boundary) and tolerates 1 missing word for 3+-word phrases — latent false-positive risk, though all 30 current fixtures pass via the strict exact-phrase path so it's not currently exploited",
+      "fix": "Switch substring `.Contains()` to word-boundary regex matching in the fallback branch",
+      "status": "open"
+    },
+    {
+      "id": "IB-050",
+      "source": "Independent review 2026-08-27 (post-implementation dogfood)",
+      "friction": "`.claude/settings.json`'s prefix-glob deny entries (`Bash(curl*)` etc., added for IB-045) can't catch curl/wget/nc invoked mid-pipeline or with an env-var prefix (e.g. `FOO=bar curl ...`) — same limitation pre-existing entries already had, not newly introduced, but worth hardening",
+      "fix": "Investigate Claude Code's permission-pattern syntax for pipeline/env-prefixed command matching, or accept as a documented limitation",
+      "status": "open"
     }
   ],
   "validation": {
@@ -283,528 +586,330 @@ const DATA = {
   "activity": [
     {
       "type": "commit",
-      "hash": "225b44f",
-      "date": "2026-05-10",
-      "msg": "Merge branch 'main' of https://github.com/hiepdnh/Agentic-Development-Lifecycle",
-      "author": "hiep18101997",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "8f4a944",
-      "date": "2026-05-10",
-      "msg": "Merge pull request #8 from hiepdnh/claude/analyze-html-article-AR7iy",
+      "hash": "5a40186",
+      "date": "2026-08-22",
+      "msg": "Merge pull request #43 from hiepdnh/feat/copilot-cli-support",
       "author": "hiep.dinhnguyenhoang",
       "commitType": "other"
     },
     {
       "type": "commit",
-      "hash": "788d518",
-      "date": "2026-05-10",
-      "msg": "feat(skills): apply HTML output convention for 5 high-ROI skills",
-      "author": "Claude",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "f1f15df",
-      "date": "2026-05-10",
-      "msg": "docs: analyze Thariq's 'Unreasonable Effectiveness of HTML' article",
-      "author": "Claude",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "f96d04e",
-      "date": "2026-05-09",
-      "msg": "Merge pull request #7 from hiepdnh/claude/analyze-interview-feature-WIYzT",
-      "author": "hiep.dinhnguyenhoang",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "1537a6b",
-      "date": "2026-05-09",
-      "msg": "docs: cập nhật references sau khi thêm /ba:reverse (skill thứ 22)",
-      "author": "Claude",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "b1dcdc7",
-      "date": "2026-05-09",
-      "msg": "feat: add /ba:reverse skill + audit.md convention (inspired by AWS AI-DLC)",
-      "author": "Claude",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "f5d7649",
-      "date": "2026-05-09",
-      "msg": "Merge pull request #6 from hiepdnh/claude/analyze-interview-feature-WIYzT",
-      "author": "hiep.dinhnguyenhoang",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "6dde97c",
-      "date": "2026-05-09",
-      "msg": "feat(ba:spec): thêm Q&A history append-only + resume capability",
-      "author": "Claude",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "c42d4b7",
-      "date": "2026-05-09",
-      "msg": "Merge pull request #5 from hiepdnh/claude/general-session-6CPVR",
-      "author": "hiep.dinhnguyenhoang",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "51a1032",
-      "date": "2026-05-09",
-      "msg": "chore(settings): remove git push from deny list",
-      "author": "Claude",
-      "commitType": "chore"
-    },
-    {
-      "type": "commit",
-      "hash": "5ea9fb8",
-      "date": "2026-05-09",
-      "msg": "fix(framework): patch settings.json + verify command-template alignment",
-      "author": "Claude",
-      "commitType": "fix"
-    },
-    {
-      "type": "commit",
-      "hash": "8842ce3",
-      "date": "2026-05-09",
-      "msg": "docs: update CLAUDE.md for SKILL-001 and SKILL-002",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "e97bef4",
-      "date": "2026-05-09",
-      "msg": "Merge pull request #4 from hiepdnh/feat/skill-001-per-agent-model-selection",
-      "author": "hiep.dinhnguyenhoang",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "5c531e5",
-      "date": "2026-05-09",
-      "msg": "Merge pull request #3 from hiepdnh/feat/skill-002-exclude-ai-docs",
-      "author": "hiep.dinhnguyenhoang",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "14b3f95",
-      "date": "2026-05-09",
-      "msg": "feat(SKILL-002): exclude AI-generated docs from git and fix installer gaps",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "953f39b",
-      "date": "2026-05-09",
-      "msg": "feat(SKILL-001): add per-agent model selection for token optimization",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "ffaccd1",
-      "date": "2026-05-08",
-      "msg": "Merge branch 'main' of https://github.com/hiepdnh/Agentic-Development-Lifecycle",
-      "author": "hiep18101997",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "7b5c54b",
-      "date": "2026-05-08",
-      "msg": "Update resource",
-      "author": "hiep18101997",
-      "commitType": "other"
-    },
-    {
-      "type": "commit",
-      "hash": "8159458",
-      "date": "2026-05-07",
-      "msg": "feat: add risk classifier, improvement backlog, validation matrix",
+      "hash": "85e5aef",
+      "date": "2026-08-22",
+      "msg": "feat: add GitHub Copilot CLI platform target",
       "author": "hiep.dinhnguyenhoang",
       "commitType": "feat"
     },
     {
       "type": "commit",
-      "hash": "5eff046",
-      "date": "2026-05-07",
-      "msg": "docs: update workflow docs for verification gate + hard stops",
-      "author": "hiep18101997",
-      "commitType": "docs"
+      "hash": "aceab27",
+      "date": "2026-08-22",
+      "msg": "Merge pull request #41 from hiepdnh/feat/dev-autopilot",
+      "author": "hiep.dinhnguyenhoang",
+      "commitType": "other"
     },
     {
       "type": "commit",
-      "hash": "ef6825b",
-      "date": "2026-05-07",
-      "msg": "docs: update workflow diagrams + dev:implement description for verification gate",
-      "author": "hiep18101997",
-      "commitType": "docs"
+      "hash": "9b7b663",
+      "date": "2026-08-22",
+      "msg": "Merge pull request #40 from hiepdnh/fix/review-verdict-handoff",
+      "author": "hiep.dinhnguyenhoang",
+      "commitType": "other"
     },
     {
       "type": "commit",
-      "hash": "79121eb",
-      "date": "2026-05-07",
-      "msg": "feat: add Bước 5 Verification Gate to dev:implement",
-      "author": "hiep18101997",
+      "hash": "58dead1",
+      "date": "2026-08-22",
+      "msg": "Merge pull request #39 from hiepdnh/fix/installer-update-overwrite",
+      "author": "hiep.dinhnguyenhoang",
+      "commitType": "other"
+    },
+    {
+      "type": "commit",
+      "hash": "8840fa3",
+      "date": "2026-08-22",
+      "msg": "Merge pull request #38 from hiepdnh/feat/adlc-task-mcp-server",
+      "author": "hiep.dinhnguyenhoang",
+      "commitType": "other"
+    },
+    {
+      "type": "commit",
+      "hash": "d7a2947",
+      "date": "2026-08-22",
+      "msg": "feat: add /dev-autopilot autonomy lane with dual blind evaluators",
+      "author": "hiep.dinhnguyenhoang",
       "commitType": "feat"
     },
     {
       "type": "commit",
-      "hash": "467ab74",
-      "date": "2026-05-07",
-      "msg": "docs: clarify dev:analyze stops at analysis.md, user must trigger dev:implement",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "8946a6b",
-      "date": "2026-05-07",
-      "msg": "fix: hard stop dev:analyze before implement — prevent auto-continuation",
-      "author": "hiep18101997",
+      "hash": "289a4dd",
+      "date": "2026-08-22",
+      "msg": "fix: complete the dev-review -> dev-pr verdict handoff",
+      "author": "hiep.dinhnguyenhoang",
       "commitType": "fix"
     },
     {
       "type": "commit",
-      "hash": "9dd012b",
-      "date": "2026-05-07",
-      "msg": "docs: add --update flag and test suite to README (EN + VI)",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "9cd5b26",
-      "date": "2026-05-07",
-      "msg": "feat: add --update flag to installer for reinstall/upgrade",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "98bf6ae",
-      "date": "2026-05-07",
-      "msg": "feat: add Skill frontmatter to all 21 command files",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "069309b",
-      "date": "2026-05-07",
-      "msg": "fix: sanitize results dir name — colon invalid on Windows paths",
-      "author": "hiep18101997",
+      "hash": "42f4af2",
+      "date": "2026-08-22",
+      "msg": "fix: stop installer --update from destroying user customizations",
+      "author": "hiep.dinhnguyenhoang",
       "commitType": "fix"
     },
     {
       "type": "commit",
-      "hash": "97a1975",
-      "date": "2026-05-07",
-      "msg": "fix: add --verbose flag required by stream-json output format",
-      "author": "hiep18101997",
-      "commitType": "fix"
-    },
-    {
-      "type": "commit",
-      "hash": "a53327d",
-      "date": "2026-05-07",
-      "msg": "feat: add skill-triggering test suite + AskUserQuestion gate rule",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "330966b",
-      "date": "2026-05-06",
-      "msg": "feat: add Skill frontmatter, shared assets, and flowchart",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "238b15d",
-      "date": "2026-05-06",
-      "msg": "chore: update GitHub username from hiep18101997 to hiepdnh",
-      "author": "hiep18101997",
-      "commitType": "chore"
-    },
-    {
-      "type": "commit",
-      "hash": "5051f0c",
-      "date": "2026-05-06",
-      "msg": "fix: per-file merge in setup.ps1 + add MIT LICENSE",
-      "author": "hiep18101997",
-      "commitType": "fix"
-    },
-    {
-      "type": "commit",
-      "hash": "9843286",
-      "date": "2026-05-05",
-      "msg": "style: update ASCII banner",
-      "author": "hiep18101997",
-      "commitType": "style"
-    },
-    {
-      "type": "commit",
-      "hash": "1796a5e",
-      "date": "2026-05-05",
-      "msg": "feat: upgrade CLI with @clack/prompts + ASCII banner",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "5f48797",
-      "date": "2026-05-05",
-      "msg": "fix: merge .claude/commands/ instead of skipping entire dir",
-      "author": "hiep18101997",
-      "commitType": "fix"
-    },
-    {
-      "type": "commit",
-      "hash": "9fa4f91",
-      "date": "2026-05-05",
-      "msg": "docs: add npx as recommended install method (Option 1)",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "cb11d86",
-      "date": "2026-05-05",
-      "msg": "feat: add npx installer via package.json + bin/install.js",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "23d0f8e",
-      "date": "2026-05-05",
-      "msg": "docs: add gh one-liner install option to avoid temp dir block",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "6d0803a",
-      "date": "2026-05-05",
-      "msg": "docs: add multilingual README with EN/VI language switcher",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "08ea677",
-      "date": "2026-05-05",
-      "msg": "feat: add -Yes flag to setup.ps1 and /install slash command",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "2571a99",
-      "date": "2026-05-05",
-      "msg": "chore: update repo URL — ADLC → Agentic-Development-Lifecycle",
-      "author": "hiep18101997",
-      "commitType": "chore"
-    },
-    {
-      "type": "commit",
-      "hash": "35243c4",
-      "date": "2026-05-05",
-      "msg": "fix: correct 5 README issues from review",
-      "author": "hiep18101997",
-      "commitType": "fix"
-    },
-    {
-      "type": "commit",
-      "hash": "359b1a5",
-      "date": "2026-05-05",
-      "msg": "docs: add image placeholders to README, create assets/ directory",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "78a90ed",
-      "date": "2026-05-05",
-      "msg": "docs: add README, setup.ps1, setup.sh for public distribution",
-      "author": "hiep18101997",
-      "commitType": "docs"
-    },
-    {
-      "type": "commit",
-      "hash": "5eaab38",
-      "date": "2026-05-05",
-      "msg": "refactor: reorganize commands into role subdirectories",
-      "author": "hiep18101997",
-      "commitType": "refactor"
-    },
-    {
-      "type": "commit",
-      "hash": "3a284b8",
-      "date": "2026-05-05",
-      "msg": "chore: remove demo artifacts (TASK-001 Reset Password examples)",
-      "author": "hiep18101997",
-      "commitType": "chore"
-    },
-    {
-      "type": "commit",
-      "hash": "238c078",
-      "date": "2026-05-05",
-      "msg": "fix: apply external review feedback — complete framework overhaul",
-      "author": "hiep18101997",
-      "commitType": "fix"
-    },
-    {
-      "type": "commit",
-      "hash": "5016fb6",
-      "date": "2026-05-05",
-      "msg": "feat: add subagent definitions for dev workflow",
-      "author": "hiep18101997",
-      "commitType": "feat"
-    },
-    {
-      "type": "commit",
-      "hash": "639de49",
-      "date": "2026-05-05",
-      "msg": "feat: initial SDLC skill framework",
-      "author": "hiep18101997",
+      "hash": "6082a0b",
+      "date": "2026-08-22",
+      "msg": "feat: add PoC MCP server for task-tracking and risk-classification",
+      "author": "hiep.dinhnguyenhoang",
       "commitType": "feat"
     }
   ],
   "skills": [
     {
       "role": "arch",
-      "name": "arch:adr",
-      "usageCount": 0
+      "name": "arch-adr",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "arch",
-      "name": "arch:review",
-      "usageCount": 0
+      "name": "arch-review",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "ba",
-      "name": "ba:reverse",
-      "usageCount": 0
+      "name": "ba-reverse",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "ba",
-      "name": "ba:spec",
-      "usageCount": 0
+      "name": "ba-spec",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "ba",
-      "name": "ba:user-story",
-      "usageCount": 0
+      "name": "ba-user-story",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "be",
-      "name": "be:bridge",
-      "usageCount": 0
+      "name": "be-bridge",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "be",
+      "name": "be-changerequest",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "be",
+      "name": "be-glossary",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "dev",
-      "name": "dev:analyze",
-      "usageCount": 0
+      "name": "dev-analyze",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "dev",
-      "name": "dev:debug",
-      "usageCount": 0
+      "name": "dev-autopilot",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "dev",
-      "name": "dev:implement",
-      "usageCount": 0
+      "name": "dev-debug",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "dev",
-      "name": "dev:pr",
-      "usageCount": 0
+      "name": "dev-implement",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "dev",
+      "name": "dev-pr",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "dev",
+      "name": "dev-review",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "docs",
-      "name": "docs:update",
-      "usageCount": 0
+      "name": "docs-project",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "docs",
+      "name": "docs-update",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "install",
+      "name": "install",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "ops",
-      "name": "ops:deploy",
-      "usageCount": 0
+      "name": "ops-deploy",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "ops",
-      "name": "ops:incident",
-      "usageCount": 0
+      "name": "ops-incident",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "pm",
-      "name": "pm:breakdown",
-      "usageCount": 0
+      "name": "pm-breakdown",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "pm",
-      "name": "pm:dashboard",
-      "usageCount": 0
+      "name": "pm-dashboard",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "pm",
-      "name": "pm:ideate",
-      "usageCount": 0
+      "name": "pm-handover",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "pm",
-      "name": "pm:status",
-      "usageCount": 0
+      "name": "pm-ideate",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "pm",
+      "name": "pm-kickoff",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "pm",
+      "name": "pm-maintain",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "pm",
+      "name": "pm-release",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "pm",
+      "name": "pm-status",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "qa",
-      "name": "qa:bug",
-      "usageCount": 0
+      "name": "qa-bug",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "qa",
-      "name": "qa:regression",
-      "usageCount": 0
+      "name": "qa-it",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "qa",
-      "name": "qa:testplan",
-      "usageCount": 0
+      "name": "qa-regression",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "qa",
+      "name": "qa-testplan",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
+    },
+    {
+      "role": "qa",
+      "name": "qa-ut",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "sec",
-      "name": "sec:review",
-      "usageCount": 0
+      "name": "sec-review",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "sm",
-      "name": "sm:retro",
-      "usageCount": 0
+      "name": "sm-retro",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     },
     {
       "role": "sm",
-      "name": "sm:standup",
-      "usageCount": 0
+      "name": "sm-standup",
+      "usageCount": 0,
+      "avgDurationMin": null,
+      "durationSamples": 0
     }
   ],
   "growth": {
@@ -919,6 +1024,35 @@ function renderKanban() {
   }).join('');
 }
 
+// ── Blocked / Ready (dependency visibility, display-only) ───
+
+function renderDependencies() {
+  const tasks = DATA.tasks;
+  const blocked = tasks.filter(t => t.blocked);
+  const ready   = tasks.filter(t => !t.blocked);
+
+  const blockedHtml = blocked.length ? blocked.map(t => `
+    <div class="t-entry" style="align-items:flex-start">
+      <span class="t-icon">⛔</span>
+      <span class="t-text" style="white-space:normal">
+        <strong>${esc(t.id)}</strong> ${phasePill(t.phase)}<br>
+        <small>Blocked by: ${t.blockers.map(b => `${esc(b.id)} (${esc(b.reason)})`).join(', ')}</small>
+      </span>
+    </div>`).join('') : '<div style="font-size:12px;color:var(--fg-muted)">No blocked tasks</div>';
+
+  const readyHtml = ready.length ? ready.map(t => `
+    <div class="t-entry" style="align-items:flex-start">
+      <span class="t-icon">✅</span>
+      <span class="t-text" style="white-space:normal">
+        <strong>${esc(t.id)}</strong> ${phasePill(t.phase)}<br>
+        <small>${t.dependsOn.length ? 'Deps satisfied: ' + esc(t.dependsOn.join(', ')) : 'No dependencies declared'}</small>
+      </span>
+    </div>`).join('') : '<div style="font-size:12px;color:var(--fg-muted)">No tasks tracked</div>';
+
+  document.getElementById('blocked-list').innerHTML = blockedHtml;
+  document.getElementById('ready-list').innerHTML = readyHtml;
+}
+
 // ── Activity timeline ───────────────────────────────────────
 
 function renderTimeline() {
@@ -1005,11 +1139,29 @@ function renderHeatmap() {
     const alpha = 0.12 + intensity * 0.88;
     const bg = `rgba(37,99,235,${alpha.toFixed(2)})`;
     const fg = intensity > 0.5 ? '#fff' : 'var(--fg)';
+    const durLabel = s.avgDurationMin != null ? ` · ~${s.avgDurationMin}m avg (${s.durationSamples} samples)` : '';
     return `<div class="hm-cell" style="background:${bg};color:${fg}"
-      title="${esc(s.name)} (${s.usageCount} uses)">
+      title="${esc(s.name)} (${s.usageCount} uses)${esc(durLabel)}">
       <span>${esc(s.name.split(':')[1] || s.name)}</span>
     </div>`;
   }).join('');
+}
+
+// ── Skill benchmark (self-reported duration overhead per skill) ──
+// Populated only from audit.md entries that include an optional "**duration**: <N>m" field
+// (see templates/audit.md field docs). Purely informational — no field means no data yet.
+
+function renderBenchmark() {
+  const el = document.getElementById('skill-benchmark');
+  if (!el) return;
+  const { skills } = DATA;
+  const withData = skills.filter(s => s.avgDurationMin != null).sort((a, b) => b.usageCount - a.usageCount).slice(0, 8);
+  if (!withData.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--fg-muted)">Chưa có duration data — agent tự ghi <code>**duration**: Xm</code> vào audit.md entry để bật benchmark.</div>';
+    return;
+  }
+  el.innerHTML = withData.map(s => `<div class="t-entry"><span class="t-text">${esc(s.name)}</span>
+    <span style="color:var(--fg-muted);font-size:11px">~${s.avgDurationMin}m avg · ${s.durationSamples} samples · ${s.usageCount} uses</span></div>`).join('');
 }
 
 // ── Health table ────────────────────────────────────────────
@@ -1123,8 +1275,10 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTimeline();
   renderDoughnut();
   renderHeatmap();
+  renderBenchmark();
   renderHealth();
   renderBacklog();
+  renderDependencies();
   initSortable();
   initGlobalSearch();
 
@@ -1214,6 +1368,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="rail-title">Skill Usage</div>
         <div class="heatmap" id="skill-heatmap"></div>
         <div style="font-size:11px;color:var(--fg-muted);margin-top:8px">Darker = more audit entries</div>
+        <div class="rail-title" style="margin-top:14px">Skill Benchmark</div>
+        <div id="skill-benchmark"></div>
       </div>
 
       <!-- Growth counters -->
@@ -1269,6 +1425,21 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr></thead>
         <tbody></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Blocked / Ready (dependency visibility) -->
+  <div class="section">
+    <div class="section-title">Blocked / Ready</div>
+    <div class="main-grid" style="grid-template-columns: 1fr 1fr">
+      <div class="rail-card">
+        <div class="rail-title">Blocked</div>
+        <div class="timeline" id="blocked-list"></div>
+      </div>
+      <div class="rail-card">
+        <div class="rail-title">Ready</div>
+        <div class="timeline" id="ready-list"></div>
+      </div>
     </div>
   </div>
 

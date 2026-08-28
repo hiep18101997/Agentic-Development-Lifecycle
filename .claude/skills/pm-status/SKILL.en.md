@@ -112,3 +112,5 @@ Questions before sending:
 | 2 | Are there any risks you know of that I haven't mentioned? | A: No / B: Yes — risk: ___ / C: Other: ___ |
 | 3 | Is the report tone appropriate for the audience? | A: Appropriate / B: Needs to be more formal / C: Needs to be more casual / D: Other: ___ |
 ```
+
+**Wait for confirmation.**

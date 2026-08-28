@@ -104,9 +104,9 @@ For each proposed file update:
 | 1 | Is the new content accurate? | A: Accurate / B: Wrong — fix: ___ / C: Other: ___ |
 | 2 | Is there any other information that needs updating that I missed? | A: No / B: Yes — add: ___ / C: Other: ___ |
 | 3 | Is the description clear enough? | A: Clear enough / B: Needs more clarity — where: ___ / C: Other: ___ |
-
-Confirm to apply the changes.
 ```
+
+**Wait for confirmation before writing the file.**
 
 ### Step 5 — After applying
 

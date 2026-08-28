@@ -110,3 +110,5 @@ Câu hỏi trước khi gửi:
 | 2 | Có risk nào bạn biết mà tôi chưa đề cập? | A: Không / B: Có — risk: ___ / C: Khác: ___ |
 | 3 | Tone báo cáo có phù hợp với audience chưa? | A: Phù hợp / B: Cần formal hơn / C: Cần casual hơn / D: Khác: ___ |
 ```
+
+**Chờ confirm.**
